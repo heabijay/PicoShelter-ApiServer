@@ -126,7 +126,7 @@ namespace PicoShelter_ApiServer.Controllers
             int? id = idStr == null ? null : int.Parse(idStr);
             try
             {
-                var stream = .GetImage(id, albumId, imageCode, imageExtension, out string type);
+                var stream = _albumService.GetImage(id, albumId, imageCode, imageExtension, out string type);
                 return File(stream, "image/" + type);
             }
             catch (FileNotFoundException)
@@ -264,54 +264,6 @@ namespace PicoShelter_ApiServer.Controllers
             }
 
             return Ok();
-        }
-
-
-        [AllowAnonymous]
-        [HttpHead("a/{albumCode}/{imageCode}")]
-        [HttpGet("a/{albumCode}/{imageCode}")]
-        public IActionResult GetImageInfo(string albumCode, string imageCode)
-        {
-            var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return NotFound();
-
-            return GetImageInfo(albumId.Value, imageCode);
-        }
-
-        [AllowAnonymous]
-        [HttpHead("s/{albumUserCode}/{imageCode}")]
-        [HttpGet("s/{albumUserCode}/{imageCode}")]
-        public IActionResult GetImageInfoByUsercode(string albumUserCode, string imageCode)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
-            if (albumId == null)
-                return NotFound();
-
-            return GetImageInfo(albumId.Value, imageCode);
-        }
-
-        private IActionResult GetImageInfo(int albumId, string imageCode)
-        {
-            var idStr = User?.Identity?.Name;
-            int? id = idStr == null ? null : int.Parse(idStr);
-            try
-            {
-                var stream = _albumService.GetImage(id, albumId, imageCode, imageExtension, out string type);
-                return File(stream, "image/" + type);
-            }
-            catch (FileNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (IOException)
-            {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
         }
     }
 }
