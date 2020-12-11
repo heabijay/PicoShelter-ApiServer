@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>PicoShelter_ApiServer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="FileRepository\**" />
+    <Content Remove="FileRepository\**" />
+    <EmbeddedResource Remove="FileRepository\**" />
+    <None Remove="FileRepository\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Startup — копия.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="5.6.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PicoShelter-ApiServer.BLL\PicoShelter-ApiServer.BLL.csproj" />
+  </ItemGroup>
+
+
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>PicoShelter_ApiServer.BLL</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PicoShelter-ApiServer.DAL\PicoShelter-ApiServer.DAL.csproj" />
+    <ProjectReference Include="..\PicoShelter-ApiServer.FDAL\PicoShelter-ApiServer.FDAL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ImageProcessor" Version="2.9.1" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

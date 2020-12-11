@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30621.155
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoShelter-ApiServer", "PicoShelter-ApiServer\PicoShelter-ApiServer.csproj", "{BA0FC750-8BD8-47C8-A7D0-F233ACF27497}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoShelter-ApiServer.DAL", "PicoShelter-ApiServer.DAL\PicoShelter-ApiServer.DAL.csproj", "{9F6F3676-0777-45ED-BA52-7B46506DE64D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PicoShelter-ApiServer.FDAL", "PicoShelter-ApiServer.FDAL\PicoShelter-ApiServer.FDAL.csproj", "{FC37B81E-DE20-42D5-BAE7-7DD14E5B8C4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoShelter-ApiServer.BLL", "PicoShelter-ApiServer.BLL\PicoShelter-ApiServer.BLL.csproj", "{8B1C557D-6890-4C70-BA00-975DAABE9099}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA0FC750-8BD8-47C8-A7D0-F233ACF27497}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA0FC750-8BD8-47C8-A7D0-F233ACF27497}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA0FC750-8BD8-47C8-A7D0-F233ACF27497}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA0FC750-8BD8-47C8-A7D0-F233ACF27497}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F6F3676-0777-45ED-BA52-7B46506DE64D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F6F3676-0777-45ED-BA52-7B46506DE64D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F6F3676-0777-45ED-BA52-7B46506DE64D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F6F3676-0777-45ED-BA52-7B46506DE64D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC37B81E-DE20-42D5-BAE7-7DD14E5B8C4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC37B81E-DE20-42D5-BAE7-7DD14E5B8C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC37B81E-DE20-42D5-BAE7-7DD14E5B8C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC37B81E-DE20-42D5-BAE7-7DD14E5B8C4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B1C557D-6890-4C70-BA00-975DAABE9099}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B1C557D-6890-4C70-BA00-975DAABE9099}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B1C557D-6890-4C70-BA00-975DAABE9099}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B1C557D-6890-4C70-BA00-975DAABE9099}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {58713763-7484-4744-9F29-CD634D9FDB5C}
+	EndGlobalSection
+EndGlobal

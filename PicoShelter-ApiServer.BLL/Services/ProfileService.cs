@@ -1,0 +1,157 @@
+﻿using ImageProcessor;
+using ImageProcessor.Common.Exceptions;
+using ImageProcessor.Imaging;
+using ImageProcessor.Imaging.Formats;
+using PicoShelter_ApiServer.BLL.Bussiness_Logic;
+using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Extensions;
+using PicoShelter_ApiServer.BLL.Interfaces;
+using PicoShelter_ApiServer.DAL.Interfaces;
+using PicoShelter_ApiServer.FDAL.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+
+namespace PicoShelter_ApiServer.BLL.Services
+{
+    public class ProfileService : IProfileService
+    {
+        IUnitOfWork db;
+        IFileUnitOfWork files;
+        IAccountService _accountService;
+        public ProfileService(IUnitOfWork unit, IFileUnitOfWork funit, IAccountService accountService)
+        {
+            db = unit;
+            files = funit;
+            _accountService = accountService;
+        }
+
+        public void Edit(int id, ProfileNameDto dto)
+        {
+            var profile = db.Profiles.Get(id);
+            profile.Firstname = dto.firstname;
+            profile.Lastname = dto.lastname;
+            db.Profiles.Update(profile);
+            db.Save();
+        }
+
+        public Stream GetAvatar(int id)
+        {
+            var profile = files.Profiles.GetOrCreate(id);
+            return files.Avatars.Get(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
+        }
+
+        public void SetAvatar(int id, Stream fs)
+        {
+            var profile = files.Profiles.GetOrCreate(id);
+            using (ImageFactory imageFactory = new ImageFactory())
+            {
+                try
+                {
+                    imageFactory.Load(fs);
+                }
+                catch (Exception ex) when ((ex is ImageFormatException) || (ex is NullReferenceException))
+                {
+                    throw new ValidationException("Input image is not valid!");
+                }
+                imageFactory.CropToThumbnail(256);
+                imageFactory.BackgroundColor(Color.White);
+                imageFactory.Format(new JpegFormat { Quality = 95 });
+                using (Stream file = files.Avatars.CreateOrUpdate(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" }))
+                {
+                    imageFactory.Save(file);
+                    
+                }
+            }
+        }
+
+        public void DeleteAvatar(int id)
+        {
+            var profile = files.Profiles.GetOrCreate(id);
+            files.Avatars.Delete(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
+        }
+
+        public int? GetIdFromUsername(string username)
+        {
+            var acc = db.Accounts.FirstOrDefault(t => t.Username.ToLower() == username.ToLower());
+            return acc?.Id;
+        }
+
+
+        public ProfileInfoDto GetProfileInfo(int id, bool adminData = false)
+        {
+            var profile = db.Profiles.Get(id);
+            if (profile != null)
+            {
+                var accDto = _accountService.GetAccountInfo(id);
+                var images = profile.Images;
+
+                IEnumerable<DAL.Entities.ImageEntity> listImages = null;
+                if (adminData)
+                    listImages = images;
+                else
+                    listImages = images.Where(t => t.IsPublic);
+
+                listImages = listImages.Reverse<DAL.Entities.ImageEntity>().Take(10);
+
+                IEnumerable<DAL.Entities.AlbumEntity> listAlbums = null;
+                if (adminData)
+                    listAlbums = profile.ProfileAlbums.Select(t => t.Album).Reverse().Take(10);
+
+                return new(
+                    accDto,
+                    listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title)).ToList(),
+                    listAlbums == null ? null : listAlbums.Select(t => new AlbumInfoDto(t.Id, t.Code, t.Title)).ToList()
+                );
+            }
+
+            return null;
+        }
+
+        public List<ImageShortInfoDto> GetImages(int id, int? starts, int? count, bool adminData = false)
+        {
+            var profile = db.Profiles.Get(id);
+            if (profile != null)
+            {
+                var images = profile.Images;
+
+                IEnumerable<DAL.Entities.ImageEntity> listImages = null;
+                if (adminData)
+                    listImages = images;
+                else
+                    listImages = images.Where(t => t.IsPublic);
+
+                listImages = listImages.Reverse();
+                listImages.Pagination(starts, count);
+
+                return listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title)).ToList();
+            }
+
+            return null;
+        }
+
+        public List<AlbumInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false)
+        {
+            var profile = db.Profiles.Get(id);
+            if (profile != null)
+            {
+                IEnumerable<DAL.Entities.AlbumEntity> listAlbums = null;
+                if (adminData)
+                    listAlbums = profile.ProfileAlbums.Select(t => t.Album);
+
+                if (listAlbums != null)
+                {
+                    listAlbums = listAlbums.Reverse();
+                    listAlbums = listAlbums.Pagination(starts, count);
+                }
+
+                return listAlbums == null ? null : listAlbums.Select(t => new AlbumInfoDto(t.Id, t.Code, t.Title)).ToList();
+            }
+
+            return null;
+        }
+    }
+}
