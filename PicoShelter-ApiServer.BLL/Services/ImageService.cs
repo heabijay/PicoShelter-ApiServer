@@ -194,8 +194,8 @@ namespace PicoShelter_ApiServer.BLL.Services
                         image.ImageCode,
                         image.Extension,
                         image.Title,
-                        userDto,
                         image.IsPublic,
+                        userDto,
                         image.CreatedDateUTC,
                         image.DeleteIn
                     );

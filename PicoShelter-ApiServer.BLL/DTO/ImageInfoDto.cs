@@ -7,8 +7,8 @@ namespace PicoShelter_ApiServer.BLL.DTO
         string imageCode,
         string imageType,
         string title,
-        AccountInfoDto user,
         bool isPublic,
+        AccountInfoDto user,
         DateTime uploadedTime,
         DateTime? autoDeleteIn
     );

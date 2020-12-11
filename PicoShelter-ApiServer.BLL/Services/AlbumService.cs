@@ -5,6 +5,7 @@ using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -221,6 +222,105 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             var dto = _imageService.GetImageInfo(imageCode, new AccessAlbumImageValidator() { RequesterId = userId, RefererAlbum = album });
             return dto;
+        }
+
+        public AlbumInfoDto GetAlbumInfo(int albumId, int? requesterId)
+        {
+            var album = db.Albums.Get(albumId);
+            if (album != null)
+            {
+                var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
+                if (validator.Validate())
+                    return new(
+                        albumId,
+                        album.Code,
+                        album.Title,
+                        album.UserCode,
+                        album.IsPublic,
+                        album.CreatedDateUTC,
+                        album.AlbumImages
+                            .Select(t => t.Image)
+                            .Reverse()
+                            .Take(10)
+                            .Select(t => new ImageShortInfoDto(
+                                t.Id,
+                                t.ImageCode,
+                                t.Extension,
+                                t.Title,
+                                t.IsPublic
+                            ))
+                            .ToList(),
+                        album.ProfileAlbums
+                            .Reverse<ProfileAlbumEntity>()
+                            .Take(10)
+                            .Select(t => new AlbumProfileInfoDto(
+                                new(
+                                    t.Profile.AccountId,
+                                    t.Profile.Account.Username,
+                                    new(
+                                        t.Profile.Firstname,
+                                        t.Profile.Lastname
+                                    ),
+                                    t.Profile.Account.Role.Name
+                                ),
+                                t.Role
+                             ))
+                            .ToList()
+                    );
+            }
+
+            return null;
+        }
+
+        public List<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count)
+        {
+            var album = db.Albums.Get(id);
+            if (album != null)
+            {
+                var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
+                if (validator.Validate())
+                {
+                    var listImages = album.AlbumImages.Select(t => t.Image);
+
+                    listImages = listImages.Reverse().Pagination(starts, count);
+
+                    return listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList();
+                }
+            }
+
+            return null;
+        }
+
+        public List<AlbumProfileInfoDto> GetUsers(int id, int? requesterId, int? starts, int? count)
+        {
+            var album = db.Albums.Get(id);
+            if (album != null)
+            {
+                var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
+                if (validator.Validate())
+                {
+                    IEnumerable<ProfileAlbumEntity> listAlbums = album.ProfileAlbums;
+
+                    listAlbums = listAlbums.Reverse().Pagination(starts, count);
+
+                    return listAlbums
+                        .Select(t => new AlbumProfileInfoDto(
+                            new(
+                                t.Profile.Account.Id,
+                                t.Profile.Account.Username,
+                                new(
+                                    t.Profile.Firstname,
+                                    t.Profile.Lastname
+                                ),
+                                t.Profile.Account.Role.Name
+                            ),
+                            t.Role
+                        ))
+                        .ToList();
+                }
+            }
+
+            return null;
         }
     }
 }

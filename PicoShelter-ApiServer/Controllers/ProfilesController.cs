@@ -36,9 +36,7 @@ namespace PicoShelter_ApiServer.Controllers
 
             var dto = _profileService.GetProfileInfo(id, authId != null && authId.Value == id);
             if (dto != null)
-            {
                 return new SuccessResponse(dto);
-            }
 
             return NotFound();
         }
@@ -64,9 +62,7 @@ namespace PicoShelter_ApiServer.Controllers
 
             var dto = _profileService.GetImages(id, starts, count, authId != null && authId.Value == id);
             if (dto != null)
-            {
                 return new SuccessResponse(dto);
-            }
 
             return NotFound();
         }
@@ -92,9 +88,7 @@ namespace PicoShelter_ApiServer.Controllers
 
             var dto = _profileService.GetAlbums(id, starts, count, authId != null && authId.Value == id);
             if (dto != null)
-            {
                 return new SuccessResponse(dto);
-            }
 
             return NotFound();
         }

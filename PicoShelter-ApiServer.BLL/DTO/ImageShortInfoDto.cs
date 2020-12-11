@@ -6,6 +6,7 @@ namespace PicoShelter_ApiServer.BLL.DTO
         int imageId,
         string imageCode,
         string imageType,
-        string title
+        string title,
+        bool isPublic
     );
 }

@@ -1,4 +1,5 @@
 ﻿using PicoShelter_ApiServer.BLL.DTO;
+using System.Collections.Generic;
 using System.IO;
 
 namespace PicoShelter_ApiServer.BLL.Interfaces
@@ -19,5 +20,8 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public bool VerifyImageOwner(int ownerId, int imageId);
         public Stream GetImage(int? userId, int albumId, string imageCode, string imageExtension, out string type);
         public ImageInfoDto GetImageInfo(int? userId, int albumId, string imageCode);
+        public AlbumInfoDto GetAlbumInfo(int albumId, int? requesterId);
+        public List<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count);
+        public List<AlbumProfileInfoDto> GetUsers(int id, int? requesterId, int? starts, int? count);
     }
 }

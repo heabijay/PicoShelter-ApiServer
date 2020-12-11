@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PicoShelter_ApiServer.BLL.Interfaces;
+using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
@@ -16,11 +17,119 @@ namespace PicoShelter_ApiServer.Controllers
     public class AlbumsController : ControllerBase
     {
         IAlbumService _albumService;
-        IImageService _imageService;
-        public AlbumsController(IAlbumService albumService, IImageService imageService)
+        public AlbumsController(IAlbumService albumService)
         {
             _albumService = albumService;
-            _imageService = imageService;
+        }
+
+
+        [AllowAnonymous]
+        [HttpHead("a/{albumCode}")]
+        [HttpGet("a/{albumCode}")]
+        public IActionResult GetAlbumInfo(string albumCode)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetAlbumInfo(albumId.Value);
+        }
+
+        [AllowAnonymous]
+        [HttpHead("s/{albumUserCode}")]
+        [HttpGet("s/{albumUserCode}")]
+        public IActionResult GetAlbumInfoByUsercode(string albumUserCode)
+        {
+            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetAlbumInfo(albumId.Value);
+        }
+
+        private IActionResult GetAlbumInfo(int albumId)
+        {
+            var idStr = User?.Identity?.Name;
+            int? id = idStr == null ? null : int.Parse(idStr);
+            var dto = _albumService.GetAlbumInfo(albumId, id);
+            if (dto != null)
+                return new SuccessResponse(dto);
+
+            return NotFound();
+        }
+
+
+        [AllowAnonymous]
+        [HttpHead("a/{albumCode}/images")]
+        [HttpGet("a/{albumCode}/images")]
+        public IActionResult GetImages([FromRoute] string albumCode, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetImages(albumId.Value, starts, count);
+        }
+
+        [AllowAnonymous]
+        [HttpHead("s/{albumUserCode}/images")]
+        [HttpGet("s/{albumUserCode}/images")]
+        public IActionResult GetImagesByUsercode([FromRoute] string albumUserCode, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetImages(albumId.Value, starts, count);
+        }
+
+        private IActionResult GetImages(int id, int? starts, int? count)
+        {
+            string idStr = User?.Identity?.Name;
+            int? authId = idStr == null ? null : int.Parse(idStr);
+
+            var dto = _albumService.GetImages(id, authId, starts, count);
+            if (dto != null)
+                return new SuccessResponse(dto);
+
+            return NotFound();
+        }
+
+
+        [AllowAnonymous]
+        [HttpHead("a/{albumCode}/users")]
+        [HttpGet("a/{albumCode}/users")]
+        public IActionResult GetUsers([FromRoute] string albumCode, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetUsers(albumId.Value, starts, count);
+        }
+
+        [AllowAnonymous]
+        [HttpHead("s/{albumUserCode}/users")]
+        [HttpGet("s/{albumUserCode}/users")]
+        public IActionResult GetUsersByUsercode([FromRoute] string albumUserCode, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetUsers(albumId.Value, starts, count);
+        }
+
+        private IActionResult GetUsers(int id, int? starts, int? count)
+        {
+            string idStr = User?.Identity?.Name;
+            int? authId = idStr == null ? null : int.Parse(idStr);
+
+            var dto = _albumService.GetUsers(id, authId, starts, count);
+            if (dto != null)
+                return new SuccessResponse(dto);
+
+            return NotFound();
         }
 
 

@@ -13,6 +13,6 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public int? GetIdFromUsername(string username);
         public ProfileInfoDto GetProfileInfo(int id, bool adminData = false);
         public List<ImageShortInfoDto> GetImages(int id, int? starts, int? count, bool adminData = false);
-        public List<AlbumInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false);
+        public List<AlbumShortInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false);
     }
 }

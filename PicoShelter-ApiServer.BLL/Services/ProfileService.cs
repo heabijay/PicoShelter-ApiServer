@@ -103,8 +103,8 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                 return new(
                     accDto,
-                    listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title)).ToList(),
-                    listAlbums == null ? null : listAlbums.Select(t => new AlbumInfoDto(t.Id, t.Code, t.Title)).ToList()
+                    listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList(),
+                    listAlbums == null ? null : listAlbums.Select(t => new AlbumShortInfoDto(t.Id, t.Code, t.Title)).ToList()
                 );
             }
 
@@ -127,13 +127,13 @@ namespace PicoShelter_ApiServer.BLL.Services
                 listImages = listImages.Reverse();
                 listImages.Pagination(starts, count);
 
-                return listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title)).ToList();
+                return listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList();
             }
 
             return null;
         }
 
-        public List<AlbumInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false)
+        public List<AlbumShortInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false)
         {
             var profile = db.Profiles.Get(id);
             if (profile != null)
@@ -148,7 +148,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                     listAlbums = listAlbums.Pagination(starts, count);
                 }
 
-                return listAlbums == null ? null : listAlbums.Select(t => new AlbumInfoDto(t.Id, t.Code, t.Title)).ToList();
+                return listAlbums == null ? null : listAlbums.Select(t => new AlbumShortInfoDto(t.Id, t.Code, t.Title)).ToList();
             }
 
             return null;
