@@ -15,28 +15,6 @@ namespace PicoShelter_ApiServer.Controllers
             _profileService = profileService;
         }
 
-        [HttpHead("p/{username}/avatar.jpg")]
-        [HttpGet("p/{username}/avatar.jpg")]
-        public IActionResult GetAvatar([FromRoute]string username)
-        {
-            var id = _profileService.GetIdFromUsername(username);
-            if (id == null)
-                return NotFound();
-
-            return GetAvatar(id.Value);
-        }
-
-        [HttpHead("profiles/{id}/avatar.jpg")]
-        [HttpGet("profiles/{id}/avatar.jpg")]
-        public IActionResult GetAvatar([FromRoute]int id)
-        {
-            var stream = _profileService.GetAvatar(id);
-            if (stream == null)
-                return NoContent();
-
-            return File(stream, "image/jpeg");
-        }
-
 
         [HttpHead("p/{username}")]
         [HttpGet("p/{username}")]
@@ -119,6 +97,28 @@ namespace PicoShelter_ApiServer.Controllers
             }
 
             return NotFound();
+        }
+
+        [HttpHead("p/{username}/avatar.jpg")]
+        [HttpGet("p/{username}/avatar.jpg")]
+        public IActionResult GetAvatar([FromRoute] string username)
+        {
+            var id = _profileService.GetIdFromUsername(username);
+            if (id == null)
+                return NotFound();
+
+            return GetAvatar(id.Value);
+        }
+
+        [HttpHead("profiles/{id}/avatar.jpg")]
+        [HttpGet("profiles/{id}/avatar.jpg")]
+        public IActionResult GetAvatar([FromRoute] int id)
+        {
+            var stream = _profileService.GetAvatar(id);
+            if (stream == null)
+                return NoContent();
+
+            return File(stream, "image/jpeg");
         }
     }
 }

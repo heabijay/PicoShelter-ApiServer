@@ -203,14 +203,24 @@ namespace PicoShelter_ApiServer.BLL.Services
             return profileAlbum?.Role;
         }
 
-        public Stream GetImage(int? id, int albumId, string imageCode, string imageExtension, out string type)
+        public Stream GetImage(int? userId, int albumId, string imageCode, string imageExtension, out string type)
         {
             var album = db.Albums.Get(albumId);
             if (album == null)
                 throw new FileNotFoundException();
 
-            var stream = _imageService.GetImage(imageCode, imageExtension, new AccessAlbumImageValidator() { RequesterId = id, RefererAlbum = album }, out type);
+            var stream = _imageService.GetImage(imageCode, imageExtension, new AccessAlbumImageValidator() { RequesterId = userId, RefererAlbum = album }, out type);
             return stream;
+        }
+
+        public ImageInfoDto GetImageInfo(int? userId, int albumId, string imageCode)
+        {
+            var album = db.Albums.Get(albumId);
+            if (album == null)
+                throw new FileNotFoundException();
+
+            var dto = _imageService.GetImageInfo(imageCode, new AccessAlbumImageValidator() { RequesterId = userId, RefererAlbum = album });
+            return dto;
         }
     }
 }

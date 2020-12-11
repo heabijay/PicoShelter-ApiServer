@@ -33,16 +33,7 @@ namespace PicoShelter_ApiServer.Controllers
             return Ok();
         }
 
-        [HttpDelete("avatar/delete")]
-        public IActionResult DeleteAvatar()
-        {
-            var id = int.Parse(User.Identity.Name);
-            _profileService.DeleteAvatar(id);
-
-            return Ok();
-        }
-
-        [HttpPost("avatar/upload")]
+        [HttpPost("avatar")]
         public IActionResult UploadAvatar(IFormFile file)
         {
             var id = int.Parse(User.Identity.Name);
@@ -57,6 +48,15 @@ namespace PicoShelter_ApiServer.Controllers
                     return new ErrorResponse(ex);
                 }
             }
+
+            return Ok();
+        }
+
+        [HttpDelete("avatar")]
+        public IActionResult DeleteAvatar()
+        {
+            var id = int.Parse(User.Identity.Name);
+            _profileService.DeleteAvatar(id);
 
             return Ok();
         }

@@ -25,6 +25,94 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
 
+        [HttpHead("{code}")]
+        [HttpGet("{code}")]
+        public IActionResult GetImageInfo(string code)
+        {
+            var idStr = User?.Identity?.Name;
+            int? id = idStr == null ? null : int.Parse(idStr);
+            try
+            {
+                var info = _imageService.GetImageInfo(code, new AccessUserImageValidator() { RequesterId = id });
+                return new SuccessResponse(info);
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (IOException)
+            {
+                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+
+        [HttpPut("{code}")]
+        public IActionResult EditImage(string code, [FromBody]ImageEditModel m)
+        {
+            var idStr = User?.Identity?.Name;
+            int? id = idStr == null ? null : int.Parse(idStr);
+            try
+            {
+                if (id == null)
+                    throw new UnauthorizedAccessException();
+
+                var dto = new ImageEditDto(
+                    m.title,
+                    m.deleteInHours == null ? null : DateTime.UtcNow + TimeSpan.FromHours(m.deleteInHours.Value),
+                    m.isPublic
+                );
+
+                _imageService.EditImage(code, id.Value, dto);
+                return Ok();
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (IOException)
+            {
+                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+
+        [HttpDelete("{code}")]
+        public IActionResult DeleteImage(string code)
+        {
+            var idStr = User?.Identity?.Name;
+            int? id = idStr == null ? null : int.Parse(idStr);
+            try
+            {
+                if (id == null)
+                    throw new UnauthorizedAccessException();
+
+                _imageService.DeleteImage(code, id.Value);
+                return Ok();
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (IOException)
+            {
+                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+
         [HttpHead("{code}.{extension}")]
         [HttpGet("{code}.{extension}")]
         //[SwaggerOperation("Gets the image by code and extension")]
@@ -80,92 +168,6 @@ namespace PicoShelter_ApiServer.Controllers
             }
         }
 
-
-        [HttpHead("{code}")]
-        [HttpGet("{code}")]
-        public IActionResult GetImageInfo(string code)
-        {
-            var idStr = User?.Identity?.Name;
-            int? id = idStr == null ? null : int.Parse(idStr);
-            try
-            {
-                var info = _imageService.GetImageInfo(code, new AccessUserImageValidator() { RequesterId = id });
-                return new SuccessResponse(info);
-            }
-            catch (FileNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (IOException)
-            {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-        }
-
-
-        [HttpDelete("{code}")]
-        public IActionResult DeleteImage(string code)
-        {
-            var idStr = User?.Identity?.Name;
-            int? id = idStr == null ? null : int.Parse(idStr);
-            try
-            {
-                if (id == null)
-                    throw new UnauthorizedAccessException();
-
-                _imageService.DeleteImage(code, id.Value);
-                return Ok();
-            }
-            catch (FileNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (IOException)
-            {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-        }
-
-        [HttpPut("{code}")]
-        public IActionResult EditImage(string code, [FromBody]ImageEditModel m)
-        {
-            var idStr = User?.Identity?.Name;
-            int? id = idStr == null ? null : int.Parse(idStr);
-            try
-            {
-                if (id == null)
-                    throw new UnauthorizedAccessException();
-
-                var dto = new ImageEditDto(
-                    m.title,
-                    m.deleteInHours == null ? null : DateTime.UtcNow + TimeSpan.FromHours(m.deleteInHours.Value),
-                    m.isPublic
-                );
-
-                _imageService.EditImage(code, id.Value, dto);
-                return Ok();
-            }
-            catch (FileNotFoundException)
-            {
-                return NotFound();
-            }
-            catch (IOException)
-            {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-        }
 
         [HttpGet("{code}/share={isPublic}")]
         public IActionResult ShareImage(string code, bool isPublic)

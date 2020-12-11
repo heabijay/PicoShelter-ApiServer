@@ -23,76 +23,52 @@ namespace PicoShelter_ApiServer.Controllers
             _imageService = imageService;
         }
 
-        [HttpPut("a/{albumCode}/changerole")]
-        public IActionResult ChangeRole(string albumCode, [FromBody]AlbumChangeRoleModel m)
+
+        [AllowAnonymous]
+        [HttpHead("a/{albumCode}/{imageCode}")]
+        [HttpGet("a/{albumCode}/{imageCode}")]
+        public IActionResult GetImageInfo(string albumCode, string imageCode)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return NotFound();
 
-            return ChangeRole(albumId.Value, m);
+            return GetImageInfo(albumId.Value, imageCode);
         }
 
-        [HttpPut("s/{albumUserCode}/changerole")]
-        public IActionResult ChangeRoleByUsercode(string albumUserCode, [FromBody] AlbumChangeRoleModel m)
+        [AllowAnonymous]
+        [HttpHead("s/{albumUserCode}/{imageCode}")]
+        [HttpGet("s/{albumUserCode}/{imageCode}")]
+        public IActionResult GetImageInfoByUsercode(string albumUserCode, string imageCode)
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return NotFound();
 
-            return ChangeRole(albumId.Value, m);
+            return GetImageInfo(albumId.Value, imageCode);
         }
 
-        private IActionResult ChangeRole(int albumId, AlbumChangeRoleModel m)
+        private IActionResult GetImageInfo(int albumId, string imageCode)
         {
-            int userId = int.Parse(User.Identity.Name);
-
-            var role = _albumService.GetUserRole(albumId, userId);
-            if (role != DAL.Enums.AlbumUserRole.admin)
-                return Forbid();
-
+            var idStr = User?.Identity?.Name;
+            int? id = idStr == null ? null : int.Parse(idStr);
             try
             {
-                _albumService.ChangeRole(albumId, m.profileId, m.role);
+                var dto = _albumService.GetImageInfo(id, albumId, imageCode);
+                return new SuccessResponse(dto);
             }
-            catch (ValidationException ex)
+            catch (FileNotFoundException)
             {
-                return new ErrorResponse(ex);
+                return NotFound();
             }
-
-            return Ok();
-        }
-
-
-        [HttpDelete("a/{albumCode}/deleteAlbum")]
-        public IActionResult DeleteAlbum(string albumCode)
-        {
-            var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return new ErrorResponse("Album not found");
-
-            return DeleteAlbum(albumId.Value);
-        }
-
-        [HttpDelete("s/{albumUserCode}/deleteAlbum")]
-        public IActionResult DeleteAlbumByUsercode(string albumUserCode)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
-            if (albumId == null)
-                return new ErrorResponse("Album not found");
-
-            return DeleteAlbum(albumId.Value);
-        }
-
-        private IActionResult DeleteAlbum(int albumId)
-        {
-            int userId = int.Parse(User.Identity.Name);
-            if (_albumService.GetUserRole(albumId, userId) != DAL.Enums.AlbumUserRole.admin)
+            catch (IOException)
+            {
+                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+            }
+            catch (UnauthorizedAccessException)
+            {
                 return Forbid();
-
-            _albumService.DeleteAlbum(albumId);
-
-            return Ok();
+            }
         }
 
 
@@ -144,6 +120,88 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
 
+        [HttpPost("a/{albumCode}/addimages")]
+        public IActionResult AddImages(string albumCode, List<int> addImages)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return new ErrorResponse("Album not found");
+
+            return AddImages(albumId.Value, addImages);
+        }
+
+        [HttpPost("s/{albumUserCode}/addimages")]
+        public IActionResult AddImagesByUsercode(string albumUserCode, List<int> addImages)
+        {
+            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
+            if (albumId == null)
+                return new ErrorResponse("Album not found");
+
+            return AddImages(albumId.Value, addImages);
+        }
+
+        private IActionResult AddImages(int albumId, List<int> addImages)
+        {
+            int userId = int.Parse(User.Identity.Name);
+
+            var role = _albumService.GetUserRole(albumId, userId);
+            if (role == null || role == DAL.Enums.AlbumUserRole.viewer)
+                return Forbid();
+
+            try
+            {
+                _albumService.AddImages(albumId, userId, addImages.ToArray());
+            }
+            catch (ValidationException ex)
+            {
+                return new ErrorResponse(ex);
+            }
+
+            return Ok();
+        }
+
+
+        [HttpDelete("a/{albumCode}/deleteimages")]
+        public IActionResult DeleteImages(string albumCode, List<int> deleteImages)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return new ErrorResponse("Album not found");
+
+            return DeleteImages(albumId.Value, deleteImages);
+        }
+
+        [HttpDelete("s/{albumUserCode}/deleteimages")]
+        public IActionResult DeleteImagesByUsercode(string albumUserCode, List<int> deleteImages)
+        {
+            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
+            if (albumId == null)
+                return new ErrorResponse("Album not found");
+
+            return DeleteImages(albumId.Value, deleteImages);
+        }
+
+        private IActionResult DeleteImages(int albumId, List<int> deleteImages)
+        {
+            int userId = int.Parse(User.Identity.Name);
+
+            var role = _albumService.GetUserRole(albumId, userId);
+            if (role == null || role == DAL.Enums.AlbumUserRole.viewer)
+                return Forbid();
+
+            try
+            {
+                _albumService.DeleteImages(albumId, deleteImages.ToArray());
+            }
+            catch (ValidationException ex)
+            {
+                return new ErrorResponse(ex);
+            }
+
+            return Ok();
+        }
+
+
         [HttpPost("a/{albumCode}/addmembers")]
         public IActionResult AddMembers(string albumCode, List<int> addMembers)
         {
@@ -175,6 +233,47 @@ namespace PicoShelter_ApiServer.Controllers
             try
             {
                 _albumService.AddMembers(albumId, addMembers.ToArray());
+            }
+            catch (ValidationException ex)
+            {
+                return new ErrorResponse(ex);
+            }
+
+            return Ok();
+        }
+
+
+        [HttpPut("a/{albumCode}/changerole")]
+        public IActionResult ChangeRole(string albumCode, [FromBody] AlbumChangeRoleModel m)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return new ErrorResponse("Album not found");
+
+            return ChangeRole(albumId.Value, m);
+        }
+
+        [HttpPut("s/{albumUserCode}/changerole")]
+        public IActionResult ChangeRoleByUsercode(string albumUserCode, [FromBody] AlbumChangeRoleModel m)
+        {
+            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
+            if (albumId == null)
+                return new ErrorResponse("Album not found");
+
+            return ChangeRole(albumId.Value, m);
+        }
+
+        private IActionResult ChangeRole(int albumId, AlbumChangeRoleModel m)
+        {
+            int userId = int.Parse(User.Identity.Name);
+
+            var role = _albumService.GetUserRole(albumId, userId);
+            if (role != DAL.Enums.AlbumUserRole.admin)
+                return Forbid();
+
+            try
+            {
+                _albumService.ChangeRole(albumId, m.profileId, m.role);
             }
             catch (ValidationException ex)
             {
@@ -226,42 +325,33 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
 
-        [HttpPost("a/{albumCode}/addimages")]
-        public IActionResult AddImages(string albumCode, List<int> addImages)
+        [HttpDelete("a/{albumCode}/deleteAlbum")]
+        public IActionResult DeleteAlbum(string albumCode)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
                 return new ErrorResponse("Album not found");
 
-            return AddImages(albumId.Value, addImages);
+            return DeleteAlbum(albumId.Value);
         }
 
-        [HttpPost("s/{albumUserCode}/addimages")]
-        public IActionResult AddImagesByUsercode(string albumUserCode, List<int> addImages)
+        [HttpDelete("s/{albumUserCode}/deleteAlbum")]
+        public IActionResult DeleteAlbumByUsercode(string albumUserCode)
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
                 return new ErrorResponse("Album not found");
 
-            return AddImages(albumId.Value, addImages);
+            return DeleteAlbum(albumId.Value);
         }
 
-        private IActionResult AddImages(int albumId, List<int> addImages)
+        private IActionResult DeleteAlbum(int albumId)
         {
             int userId = int.Parse(User.Identity.Name);
-
-            var role = _albumService.GetUserRole(albumId, userId);
-            if (role == null || role == DAL.Enums.AlbumUserRole.viewer)
+            if (_albumService.GetUserRole(albumId, userId) != DAL.Enums.AlbumUserRole.admin)
                 return Forbid();
 
-            try
-            {
-                _albumService.AddImages(albumId, userId, addImages.ToArray());
-            }
-            catch (ValidationException ex)
-            {
-                return new ErrorResponse(ex);
-            }
+            _albumService.DeleteAlbum(albumId);
 
             return Ok();
         }
