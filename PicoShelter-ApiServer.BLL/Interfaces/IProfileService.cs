@@ -12,7 +12,7 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public void DeleteAvatar(int id);
         public int? GetIdFromUsername(string username);
         public ProfileInfoDto GetProfileInfo(int id, bool adminData = false);
-        public List<ImageShortInfoDto> GetImages(int id, int? starts, int? count, bool adminData = false);
-        public List<AlbumShortInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false);
+        public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? starts, int? count, bool adminData = false);
+        public PaginationResultDto<AlbumShortInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false);
     }
 }

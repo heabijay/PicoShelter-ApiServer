@@ -272,7 +272,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             return null;
         }
 
-        public List<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count)
+        public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count)
         {
             var album = db.Albums.Get(id);
             if (album != null)
@@ -284,14 +284,15 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     listImages = listImages.Reverse().Pagination(starts, count);
 
-                    return listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList();
+                    var dtos = listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList();
+                    return new PaginationResultDto<ImageShortInfoDto>(dtos, listImages.Count());
                 }
             }
 
             return null;
         }
 
-        public List<AlbumProfileInfoDto> GetUsers(int id, int? requesterId, int? starts, int? count)
+        public PaginationResultDto<AlbumProfileInfoDto> GetUsers(int id, int? requesterId, int? starts, int? count)
         {
             var album = db.Albums.Get(id);
             if (album != null)
@@ -303,7 +304,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     listAlbums = listAlbums.Reverse().Pagination(starts, count);
 
-                    return listAlbums
+                    var dtos = listAlbums
                         .Select(t => new AlbumProfileInfoDto(
                             new(
                                 t.Profile.Account.Id,
@@ -317,6 +318,8 @@ namespace PicoShelter_ApiServer.BLL.Services
                             t.Role
                         ))
                         .ToList();
+
+                    return new PaginationResultDto<AlbumProfileInfoDto>(dtos, listAlbums.Count());
                 }
             }
 

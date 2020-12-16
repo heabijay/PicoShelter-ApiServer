@@ -21,7 +21,7 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public Stream GetImage(int? userId, int albumId, string imageCode, string imageExtension, out string type);
         public ImageInfoDto GetImageInfo(int? userId, int albumId, string imageCode);
         public AlbumInfoDto GetAlbumInfo(int albumId, int? requesterId);
-        public List<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count);
-        public List<AlbumProfileInfoDto> GetUsers(int id, int? requesterId, int? starts, int? count);
+        public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count);
+        public PaginationResultDto<AlbumProfileInfoDto> GetUsers(int id, int? requesterId, int? starts, int? count);
     }
 }
