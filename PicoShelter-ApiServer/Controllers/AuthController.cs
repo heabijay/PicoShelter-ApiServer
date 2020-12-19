@@ -56,6 +56,17 @@ namespace PicoShelter_ApiServer.Controllers
             return GetToken(username, m.Password);
         }
 
+
+        [HttpHead("getInfo")]
+        [HttpGet("getInfo")]
+        [Authorize]
+        public IActionResult GetCurrent()
+        {
+            int id = int.Parse(User.Identity.Name);
+            return new SuccessResponse(_accountService.GetAccountInfo(id));
+
+        }
+
         [HttpPut("changepassword")]
         [Authorize]
         public IActionResult ChangePassword([FromBody]AccountChangePasswordModel m)
