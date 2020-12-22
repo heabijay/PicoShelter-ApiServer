@@ -18,8 +18,10 @@ namespace PicoShelter_ApiServer.BLL.Services
             files = funit;
         }
 
-        public void Register(AccountDto account)
+        public void Register(AccountDto _account)
         {
+            var account = _account with { username = _account.username.Trim(), email = _account.email.Trim() };
+
             var usernameRegistered = database.Accounts.Any(t => t.Username.Equals(account.username, System.StringComparison.OrdinalIgnoreCase));
             if (usernameRegistered)
                 throw new ValidationException("Username already registered!");
@@ -49,9 +51,11 @@ namespace PicoShelter_ApiServer.BLL.Services
             database.Save();
         }
 
-        public AccountIdentityDto Login(AccountLoginDto dto)
+        public AccountIdentityDto Login(AccountLoginDto _dto)
         {
-            var account = database.Accounts.FirstOrDefault(t => t.Username.Equals(dto.username, System.StringComparison.OrdinalIgnoreCase));
+            var dto = _dto with { username = _dto.username.Trim() };
+
+            var account = database.Accounts.FirstOrDefault(t => t.Username.Equals(dto.username.Trim(), System.StringComparison.OrdinalIgnoreCase));
             if (account != null)
             {
                 var isPwdCorrect = SecurePasswordHasher.Verify(dto.password, account.Password);
@@ -67,6 +71,8 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public string GetUsernameByEmail(string email)
         {
+            email = email.Trim();
+
             var account = database.Accounts.FirstOrDefault(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
             if (account != null)
             {
