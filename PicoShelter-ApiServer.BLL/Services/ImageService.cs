@@ -109,9 +109,9 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = db.Images.Get(id.Value);
-                var ext = extension.ToLower().Replace("jpg", "jpeg");
+                var ext = extension.Replace("jpg", "jpeg", StringComparison.OrdinalIgnoreCase);
 
-                if (image.Extension.ToLower() == ext)
+                if (image.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase))
                 {
                     typeExtension = image.Extension;
                     validator.ImageEntity = image;
@@ -172,7 +172,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public int? GetImageIdByCode(string code)
         {
-            var image = db.Images.FirstOrDefault(t => t.ImageCode.ToLower() == code.ToLower());
+            var image = db.Images.FirstOrDefault(t => t.ImageCode.Equals(code, StringComparison.OrdinalIgnoreCase));
             return image?.Id;
         }
 

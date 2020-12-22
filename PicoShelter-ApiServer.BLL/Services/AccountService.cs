@@ -20,11 +20,11 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public void Register(AccountDto account)
         {
-            var usernameRegistered = database.Accounts.Any(t => t.Username.ToLower() == account.username.ToLower());
+            var usernameRegistered = database.Accounts.Any(t => t.Username.Equals(account.username, System.StringComparison.OrdinalIgnoreCase));
             if (usernameRegistered)
                 throw new ValidationException("Username already registered!");
 
-            var emailRegistered = database.Accounts.Any(t => t.Email.ToLower() == account.email.ToLower());
+            var emailRegistered = database.Accounts.Any(t => t.Email.Equals(account.email, System.StringComparison.OrdinalIgnoreCase));
             if (emailRegistered)
                 throw new ValidationException("Email already registered!");
 
@@ -51,7 +51,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public AccountIdentityDto Login(AccountLoginDto dto)
         {
-            var account = database.Accounts.FirstOrDefault(t => t.Username.ToLower() == dto.username.ToLower());
+            var account = database.Accounts.FirstOrDefault(t => t.Username.Equals(dto.username, System.StringComparison.OrdinalIgnoreCase));
             if (account != null)
             {
                 var isPwdCorrect = SecurePasswordHasher.Verify(dto.password, account.Password);
@@ -67,7 +67,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public string GetUsernameByEmail(string email)
         {
-            var account = database.Accounts.FirstOrDefault(t => t.Email.ToLower() == email.ToLower());
+            var account = database.Accounts.FirstOrDefault(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
             if (account != null)
             {
                 return account.Username;

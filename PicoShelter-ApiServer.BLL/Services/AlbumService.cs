@@ -53,12 +53,12 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public int? GetAlbumIdByCode(string code)
         {
-            return db.Albums.FirstOrDefault(t => t.Code.ToUpper() == code.ToUpper())?.Id;
+            return db.Albums.FirstOrDefault(t => t.Code.Equals(code, StringComparison.OrdinalIgnoreCase))?.Id;
         }
 
         public int? GetAlbumIdByUserCode(string userCode)
         {
-            return db.Albums.FirstOrDefault(t => t.UserCode.ToUpper() == userCode.ToUpper())?.Id;
+            return db.Albums.FirstOrDefault(t => t.UserCode.Equals(userCode, StringComparison.OrdinalIgnoreCase))?.Id;
         }
 
         public bool VerifyImageOwner(int ownerId, int imageId)
@@ -184,7 +184,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public void SetUsercode(int albumId, string usercode)
         {
-            var isExist = db.Albums.Any(t => t.UserCode.ToLower() == usercode.ToLower());
+            var isExist = db.Albums.Any(t => t.UserCode.Equals(usercode, StringComparison.OrdinalIgnoreCase));
             if (isExist)
                 throw new ValidationException("Selected usercode already taken");
 

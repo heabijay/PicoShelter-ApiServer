@@ -76,7 +76,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public int? GetIdFromUsername(string username)
         {
-            var acc = db.Accounts.FirstOrDefault(t => t.Username.ToLower() == username.ToLower());
+            var acc = db.Accounts.FirstOrDefault(t => t.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
             return acc?.Id;
         }
 
