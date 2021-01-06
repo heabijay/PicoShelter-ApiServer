@@ -419,8 +419,10 @@ namespace PicoShelter_ApiServer.Controllers
             int userId = int.Parse(User.Identity.Name);
 
             var role = _albumService.GetUserRole(albumId, userId);
-            if (role != DAL.Enums.AlbumUserRole.admin)
-                return Forbid();
+
+            if (deleteMembers.Count != 1 || deleteMembers[0] != userId)
+                if (role != DAL.Enums.AlbumUserRole.admin)
+                    return Forbid();
 
             try
             {
