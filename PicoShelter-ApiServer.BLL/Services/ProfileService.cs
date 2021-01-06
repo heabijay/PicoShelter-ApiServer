@@ -5,12 +5,12 @@ using ImageProcessor.Imaging.Formats;
 using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Extensions;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -55,7 +55,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 }
                 catch (Exception ex) when ((ex is ImageFormatException) || (ex is NullReferenceException))
                 {
-                    throw new ValidationException("Input image is not valid!");
+                    throw new HandlingException(ExceptionType.INPUT_IMAGE_INVALID);
                 }
                 imageFactory.CropToThumbnail(256);
                 imageFactory.BackgroundColor(Color.White);

@@ -9,7 +9,7 @@ namespace PicoShelter_ApiServer.Requests.Models
         string Email,
 
         [Required(ErrorMessage = "No Username specified", AllowEmptyStrings = false)]
-        [RegularExpression(@"^[a-zA-Z0-9]{3,20}$", ErrorMessage = "Username length must be 3..20, can contains numbers, letters and '_'")]
+        [RegularExpression(@"^[a-zA-Z0-9_]{3,20}$", ErrorMessage = "Username length must be 3..20, can contains numbers, letters and '_'")]
         string Username,
 
         [DataType(DataType.Password)]

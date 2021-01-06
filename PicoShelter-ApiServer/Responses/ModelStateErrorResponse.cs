@@ -8,7 +8,7 @@ namespace PicoShelter_ApiServer.Responses
     {
         public static ModelStateErrorResponseModel GenerateResponse(ModelStateDictionary modelState)
         {
-            var response = new ModelStateErrorResponseModel("Here is " + modelState.ErrorCount + " errors in request.", new());
+            var response = new ModelStateErrorResponseModel(new());
             foreach (var key in modelState?.Keys)
             {
                 var errorsInKey = modelState[key]?.Errors;

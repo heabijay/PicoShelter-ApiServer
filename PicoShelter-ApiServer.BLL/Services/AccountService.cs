@@ -1,10 +1,10 @@
 ﻿using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Interfaces;
-using System.ComponentModel.DataAnnotations;
 
 namespace PicoShelter_ApiServer.BLL.Services
 {
@@ -24,11 +24,11 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             var usernameRegistered = database.Accounts.Any(t => t.Username.Equals(account.username, System.StringComparison.OrdinalIgnoreCase));
             if (usernameRegistered)
-                throw new ValidationException("Username already registered!");
+                throw new HandlingException(ExceptionType.USERNAME_ALREADY_REGISTERED);
 
             var emailRegistered = database.Accounts.Any(t => t.Email.Equals(account.email, System.StringComparison.OrdinalIgnoreCase));
             if (emailRegistered)
-                throw new ValidationException("Email already registered!");
+                throw new HandlingException(ExceptionType.EMAIL_ALREADY_REGISTERED);
 
             var hashedPwd = SecurePasswordHasher.Hash(account.password);
 
@@ -86,11 +86,11 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var account = database.Accounts.Get(dto.id);
             if (account == null)
-                throw new ValidationException("Account doesn't exist");
+                throw new HandlingException(ExceptionType.USER_NOT_FOUND);
 
             var isPwdCorrect = SecurePasswordHasher.Verify(dto.currentPwd, account.Password);
             if (!isPwdCorrect)
-                throw new ValidationException("Current password doesn't correct");
+                throw new HandlingException(ExceptionType.CREDENTIALS_INCORRECT);
 
             account.Password = SecurePasswordHasher.Hash(dto.newPwd);
             database.Accounts.Update(account);

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.Requests.Models;
@@ -77,7 +78,7 @@ namespace PicoShelter_ApiServer.Controllers
                 var responseDto = _imageService.GetImageInfo(imageCode, new AccessUserImageValidator() { RequesterId = profileId });
                 return new SuccessResponse(responseDto);
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }

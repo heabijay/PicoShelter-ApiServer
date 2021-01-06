@@ -1,12 +1,12 @@
 ﻿using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 
@@ -74,12 +74,12 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var album = db.Albums.Get(albumId);
             if (album == null)
-                throw new ValidationException("Selected album doesn't exist");
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             foreach (var imageId in imagesId)
             {
                 if (!VerifyImageOwner(requesterId, imageId))
-                    throw new ValidationException("Image #" + imageId + " must be your own");
+                    throw new HandlingException(ExceptionType.YOU_NOT_OWNER_OF_IMAGE, imageId);
             }
 
             foreach (var imageId in imagesId)
@@ -98,7 +98,7 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var album = db.Albums.Get(albumId);
             if (album == null)
-                throw new ValidationException("Selected album doesn't exist");
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             foreach (var imageId in imagesId)
             {
@@ -114,13 +114,13 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var album = db.Albums.Get(albumId);
             if (album == null)
-                throw new ValidationException("Selected album doesn't exist");
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             foreach (var profileId in profilesId)
             {
                 var user = db.Profiles.Get(profileId);
                 if (user == null)
-                    throw new ValidationException("User # " + profileId + " doesn't exist");
+                    throw new HandlingException(ExceptionType.USER_NOT_FOUND, profileId);
             }
 
             foreach (var profileId in profilesId)
@@ -140,16 +140,16 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var album = db.Albums.Get(albumId);
             if (album == null)
-                throw new ValidationException("Selected album doesn't exist");
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             foreach (var profileId in profilesId)
             {
                 var profileAlbum = album.ProfileAlbums.FirstOrDefault(t => t.ProfileId == profileId);
                 if (profileAlbum == null)
-                    throw new ValidationException("User #" + profileId + " isn't a member of this album");
+                    throw new HandlingException(ExceptionType.USER_NOT_FOUND, profileId);
 
                 if (profileAlbum.Role == DAL.Enums.AlbumUserRole.admin)
-                    throw new ValidationException("Admin couldn't be kicked from album");
+                    throw new HandlingException(ExceptionType.ADMIN_KICK_DISALLOWED, profileId);
             }
 
             foreach (var profileId in profilesId)
@@ -164,11 +164,11 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var album = db.Albums.Get(albumId);
             if (album == null)
-                throw new ValidationException("Selected album doesn't exist");
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             var profileAlbum = album.ProfileAlbums.FirstOrDefault(t => t.ProfileId == profileId);
             if (profileAlbum == null)
-                throw new ValidationException("Selected user isn't a member of this album");
+                throw new HandlingException(ExceptionType.USER_NOT_FOUND, profileId);
 
             if (role == DAL.Enums.AlbumUserRole.admin)
             {
@@ -186,7 +186,7 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var isExist = db.Albums.Any(t => t.UserCode.Equals(usercode, StringComparison.OrdinalIgnoreCase));
             if (isExist)
-                throw new ValidationException("Selected usercode already taken");
+                throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
 
             var album = db.Albums.Get(albumId);
             album.Code = usercode;
@@ -198,7 +198,7 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var album = db.Albums.Get(albumId);
             if (album == null)
-                throw new ValidationException("Selected album doesn't exist");
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             var profileAlbum = album.ProfileAlbums.FirstOrDefault(t => t.ProfileId == profileId);
             return profileAlbum?.Role;

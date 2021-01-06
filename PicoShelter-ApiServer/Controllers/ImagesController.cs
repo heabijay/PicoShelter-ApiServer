@@ -42,7 +42,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(BLL.Infrastructure.ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {
@@ -76,7 +76,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(BLL.Infrastructure.ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {
@@ -104,7 +104,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(BLL.Infrastructure.ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {
@@ -135,7 +135,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(BLL.Infrastructure.ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {
@@ -160,7 +160,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(BLL.Infrastructure.ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {
@@ -188,7 +188,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(BLL.Infrastructure.ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {

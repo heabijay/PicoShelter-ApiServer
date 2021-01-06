@@ -4,13 +4,13 @@ namespace PicoShelter_ApiServer.Responses.Models
 {
     public record ErrorResponseModel : IResponseModel
     {
-        public ErrorResponseModel(object error)
+        public ErrorResponseModel(ErrorDetailsModel error)
         {
             this.success = false;
             this.error = error;
         }
 
         public bool success { get; init; }
-        public object error { get; init; }
+        public ErrorDetailsModel error { get; init; }
     }
 }

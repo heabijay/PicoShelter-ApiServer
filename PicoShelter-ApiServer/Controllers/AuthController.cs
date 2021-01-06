@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
@@ -34,7 +35,7 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 _accountService.Register(dto);
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }
@@ -77,7 +78,7 @@ namespace PicoShelter_ApiServer.Controllers
                 _accountService.ChangePassword(new(id, m.CurrentPassword, m.NewPassword));
                 return Ok();
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }

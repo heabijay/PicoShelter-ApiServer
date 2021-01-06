@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.Requests.Models;
@@ -172,7 +173,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {
@@ -220,7 +221,7 @@ namespace PicoShelter_ApiServer.Controllers
             }
             catch (IOException)
             {
-                return UnprocessableEntity(new ErrorResponseModel("We are so sorry, we have information of image, but can't find it."));
+                return UnprocessableEntity(new ErrorResponseModel(new(ExceptionType.INTERNAL_FILE_ERROR)));
             }
             catch (UnauthorizedAccessException)
             {
@@ -261,7 +262,7 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 _albumService.AddImages(albumId, userId, addImages.ToArray());
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }
@@ -302,7 +303,7 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 _albumService.DeleteImages(albumId, deleteImages.ToArray());
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }
@@ -343,7 +344,7 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 _albumService.AddMembers(albumId, addMembers.ToArray());
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }
@@ -384,7 +385,7 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 _albumService.ChangeRole(albumId, m.profileId, m.role);
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }
@@ -425,7 +426,7 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 _albumService.DeleteMembers(albumId, deleteMembers.ToArray());
             }
-            catch (ValidationException ex)
+            catch (HandlingException ex)
             {
                 return new ErrorResponse(ex);
             }
