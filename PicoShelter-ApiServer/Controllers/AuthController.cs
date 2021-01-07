@@ -90,7 +90,7 @@ namespace PicoShelter_ApiServer.Controllers
             var identity = GetIdentity(username, password);
 
             if (identity == null)
-                return new ErrorResponse("Invalid username or password");
+                return new ErrorResponse(ExceptionType.CREDENTIALS_INCORRECT);
 
             DateTime now = DateTime.UtcNow;
             DateTime expires = now + AuthOptions.LifeTime;

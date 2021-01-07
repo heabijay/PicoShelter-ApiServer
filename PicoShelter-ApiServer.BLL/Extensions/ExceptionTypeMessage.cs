@@ -51,6 +51,26 @@ namespace PicoShelter_ApiServer.Extensions
             {
                 ExceptionType.INPUT_IMAGE_INVALID,
                 "Uploaded image is incorrect or unsupported."
+            },
+            {
+                ExceptionType.ALBUM_ACCESS_FORBIDDEN,
+                "You haven't access to this album."
+            },
+            {
+                ExceptionType.UNREGISTERED_QUALITY_FORBIDDEN,
+                "Unlimited save not available for unregistered users."
+            },
+            {
+                ExceptionType.UNREGISTERED_DELETEIN_FORBIDDEN,
+                "Quality >95% not available for unregistered users."
+            },
+            {
+                ExceptionType.UNREGISTERED_ISPUBLICPROP_FORBIDDEN,
+                "Private upload not available for unregistered users."
+            },
+            {
+                ExceptionType.UNREGISTERED_JOINTOALBUM_FORBIDDEN,
+                "Join to albums not available for unregistered users."
             }
         };
 

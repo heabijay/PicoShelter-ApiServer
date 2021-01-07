@@ -37,13 +37,13 @@ namespace PicoShelter_ApiServer.Controllers
             if (profileId == null)
             {
                 if (deleteIn == null)
-                    return new ErrorResponse("Unlimited save not available for unregistered users");
+                    return new ErrorResponse(ExceptionType.UNREGISTERED_DELETEIN_FORBIDDEN);
                 if (form.quality > 95)
-                    return new ErrorResponse("Quality >95% not available for unregistered users");
+                    return new ErrorResponse(ExceptionType.UNREGISTERED_QUALITY_FORBIDDEN);
                 if (form.isPublic == false)
-                    return new ErrorResponse("Private upload not available for unregistered users");
+                    return new ErrorResponse(ExceptionType.UNREGISTERED_ISPUBLICPROP_FORBIDDEN);
                 if (form.JoinToAlbums?.Count > 0)
-                    return new ErrorResponse("Join to albums not available for unregistered users");
+                    return new ErrorResponse(ExceptionType.UNREGISTERED_JOINTOALBUM_FORBIDDEN);
             }
 
             if (form.JoinToAlbums != null)
@@ -53,7 +53,7 @@ namespace PicoShelter_ApiServer.Controllers
                     var userRole = _albumService.GetUserRole(albumid, profileId.Value);
                     if (userRole == null || userRole == DAL.Enums.AlbumUserRole.viewer)
                     {
-                        return new ErrorResponse("Album #" + albumid + " not available for you");
+                        return new ErrorResponse(ExceptionType.ALBUM_ACCESS_FORBIDDEN);
                     }
                 }
             }

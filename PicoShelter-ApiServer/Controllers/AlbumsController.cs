@@ -235,7 +235,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return AddImages(albumId.Value, addImages);
         }
@@ -245,7 +245,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return AddImages(albumId.Value, addImages);
         }
@@ -276,7 +276,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return DeleteImages(albumId.Value, deleteImages);
         }
@@ -286,7 +286,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return DeleteImages(albumId.Value, deleteImages);
         }
@@ -317,7 +317,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return AddMembers(albumId.Value, addMembers);
         }
@@ -327,7 +327,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return AddMembers(albumId.Value, addMembers);
         }
@@ -358,7 +358,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return ChangeRole(albumId.Value, m);
         }
@@ -368,7 +368,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return ChangeRole(albumId.Value, m);
         }
@@ -399,7 +399,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return DeleteMembers(albumId.Value, deleteMembers);
         }
@@ -409,7 +409,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return DeleteMembers(albumId.Value, deleteMembers);
         }
@@ -442,7 +442,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return DeleteAlbum(albumId.Value);
         }
@@ -452,7 +452,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
-                return new ErrorResponse("Album not found");
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
             return DeleteAlbum(albumId.Value);
         }

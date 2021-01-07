@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
@@ -37,7 +38,7 @@ namespace PicoShelter_ApiServer.Controllers
             foreach (var joinedid in m.joinedPhotos)
             {
                 if (!_albumService.VerifyImageOwner(userId, joinedid))
-                    return new ErrorResponse("Image #" + joinedid + " must be owned by you");
+                    return new ErrorResponse(ExceptionType.YOU_NOT_OWNER_OF_IMAGE, joinedid);
             }
 
             var dto = new AlbumCreateDto(userId, m.title, m.isPublic);

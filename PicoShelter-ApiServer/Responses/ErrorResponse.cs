@@ -29,9 +29,9 @@ namespace PicoShelter_ApiServer.Responses
 
         public ErrorResponse(HandlingException exception) : base(GenerateResponse(exception)) { }
 
-        public ErrorResponse(ExceptionType type) : base(GenerateResponse(type)) { }
-        public ErrorResponse(ExceptionType type, string message) : base(GenerateResponse(type)) { }
+        public ErrorResponse(ExceptionType type, object data = null) : base(GenerateResponse(type, data)) { }
+        public ErrorResponse(ExceptionType type, string message, object data = null) : base(GenerateResponse(type, message, data)) { }
 
-        public ErrorResponse(string data) : base(GenerateResponse(data)) { }
+        public ErrorResponse(string message, object data = null) : base(GenerateResponse(message, data)) { }
     }
 }
