@@ -4,7 +4,7 @@ namespace PicoShelter_ApiServer.BLL.DTO
 {
     public record ProfileInfoDto(
         AccountInfoDto userinfo,
-        List<ImageShortInfoDto> images,
-        List<AlbumShortInfoDto> albums
+        PaginationResultDto<ImageShortInfoDto> images,
+        PaginationResultDto<AlbumShortInfoDto> albums
     );
 }

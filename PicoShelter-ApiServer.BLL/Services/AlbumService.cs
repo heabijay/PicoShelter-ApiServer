@@ -1,5 +1,6 @@
 ﻿using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
@@ -292,10 +293,10 @@ namespace PicoShelter_ApiServer.BLL.Services
                 {
                     var listImages = album.AlbumImages.Select(t => t.Image);
 
-                    listImages = listImages.Reverse().Pagination(starts, count);
+                    listImages = listImages.Reverse().Pagination(starts, count, out int summaryCount);
 
                     var dtos = listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList();
-                    return new PaginationResultDto<ImageShortInfoDto>(dtos, listImages.Count());
+                    return new PaginationResultDto<ImageShortInfoDto>(dtos, summaryCount);
                 }
             }
 
@@ -312,7 +313,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 {
                     IEnumerable<ProfileAlbumEntity> listAlbums = album.ProfileAlbums;
 
-                    listAlbums = listAlbums.Reverse().Pagination(starts, count);
+                    listAlbums = listAlbums.Reverse().Pagination(starts, count, out int summaryCount);
 
                     var dtos = listAlbums
                         .Select(t => new AlbumProfileInfoDto(
@@ -329,7 +330,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                         ))
                         .ToList();
 
-                    return new PaginationResultDto<AlbumProfileInfoDto>(dtos, listAlbums.Count());
+                    return new PaginationResultDto<AlbumProfileInfoDto>(dtos, summaryCount);
                 }
             }
 
