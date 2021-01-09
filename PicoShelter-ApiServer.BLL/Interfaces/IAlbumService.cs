@@ -19,6 +19,7 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public void DeleteAlbum(int id);
         public bool VerifyImageOwner(int ownerId, int imageId);
         public Stream GetImage(int? userId, int albumId, string imageCode, string imageExtension, out string type);
+        public Stream GetThumbnail(int? userId, int albumId, string imageCode);
         public ImageInfoDto GetImageInfo(int? userId, int albumId, string imageCode);
         public AlbumInfoDto GetAlbumInfo(int albumId, int? requesterId);
         public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count);

@@ -214,6 +214,16 @@ namespace PicoShelter_ApiServer.BLL.Services
             return stream;
         }
 
+        public Stream GetThumbnail(int? userId, int albumId, string imageCode)
+        {
+            var album = db.Albums.Get(albumId);
+            if (album == null)
+                throw new FileNotFoundException();
+
+            var stream = _imageService.GetThumbnail(imageCode, new AccessAlbumImageValidator() { RequesterId = userId, RefererAlbum = album });
+            return stream;
+        }
+
         public ImageInfoDto GetImageInfo(int? userId, int albumId, string imageCode)
         {
             var album = db.Albums.Get(albumId);

@@ -230,6 +230,54 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
 
+        [AllowAnonymous]
+        [HttpHead("a/{albumCode}/{imageCode}/thumbnail.jpg")]
+        [HttpGet("a/{albumCode}/{imageCode}/thumbnail.jpg")]
+        public IActionResult GetThumbnail(string albumCode, string imageCode)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetThumbnail(albumId.Value, imageCode);
+        }
+
+        [AllowAnonymous]
+        [HttpHead("s/{albumUserCode}/{imageCode}/thumbnail.jpg")]
+        [HttpGet("s/{albumUserCode}/{imageCode}/thumbnail.jpg")]
+        public IActionResult GetThumbnailByUsercode(string albumUserCode, string imageCode)
+        {
+            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetThumbnail(albumId.Value, imageCode);
+        }
+
+        private IActionResult GetThumbnail(int albumId, string imageCode)
+        {
+            var idStr = User?.Identity?.Name;
+            int? id = idStr == null ? null : int.Parse(idStr);
+            try
+            {
+                var stream = _albumService.GetThumbnail(id, albumId, imageCode);
+                return File(stream, "image/jpeg");
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (IOException)
+            {
+                return UnprocessableEntity(new ErrorResponseModel(new(ExceptionType.INTERNAL_FILE_ERROR)));
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
+
+
         [HttpPost("a/{albumCode}/addimages")]
         public IActionResult AddImages(string albumCode, List<int> addImages)
         {
