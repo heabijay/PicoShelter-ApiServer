@@ -126,7 +126,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                     listImages = images.Where(t => t.IsPublic);
 
                 listImages = listImages.Reverse();
-                listImages.Pagination(starts, count, out int summary);
+                listImages = listImages.Pagination(starts, count, out int summary);
 
                 var dtos = listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList();
                 return new PaginationResultDto<ImageShortInfoDto>(dtos, summary);
