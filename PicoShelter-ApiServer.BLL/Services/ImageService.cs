@@ -221,6 +221,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     db.Images.Delete(id.Value);
                     db.Save();
+                    return;
                 }
 
                 throw new UnauthorizedAccessException();
@@ -246,6 +247,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     db.Images.Update(image);
                     db.Save();
+                    return;
                 }
 
                 throw new UnauthorizedAccessException();
@@ -266,6 +268,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     db.Images.Update(image);
                     db.Save();
+                    return;
                 }
 
                 throw new UnauthorizedAccessException();
