@@ -70,13 +70,9 @@ namespace PicoShelter_ApiServer
                             if (token != null)
                             {
                                 var id = int.Parse(token.Claims.FirstOrDefault().Value);
-                                var db = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
-                                var acc = db.Accounts.Get(id);
-                                if (acc != null)
-                                {
-                                    if (acc.LastPasswordChange > token.ValidFrom)
-                                        context.Fail("Password was changed after login");
-                                }
+                                var accountService = context.HttpContext.RequestServices.GetService<IAccountService>();
+                                if (!accountService.TokenCheckPasswordChange(id, token.ValidFrom))
+                                    context.Fail("Password was changed after login");
                             }
 
                             return Task.CompletedTask;

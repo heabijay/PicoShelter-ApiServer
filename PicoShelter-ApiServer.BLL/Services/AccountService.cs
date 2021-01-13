@@ -19,6 +19,15 @@ namespace PicoShelter_ApiServer.BLL.Services
             files = funit;
         }
 
+        public bool TokenCheckPasswordChange(int id, DateTime validFrom)
+        {
+            var acc = database.Accounts.Get(id);
+            if (acc.LastPasswordChange > validFrom)
+                return false;
+
+            return true;
+        }
+
         public void Register(AccountDto _account)
         {
             var account = _account with { username = _account.username.Trim(), email = _account.email.Trim() };
