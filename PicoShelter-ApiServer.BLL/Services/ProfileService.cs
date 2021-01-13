@@ -41,7 +41,7 @@ namespace PicoShelter_ApiServer.BLL.Services
         public Stream GetAvatar(int id)
         {
             var profile = files.Profiles.GetOrCreate(id);
-            return files.Avatars.Get(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpg" });
+            return files.Avatars.Get(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
         }
 
         public void SetAvatar(int id, Stream fs)
