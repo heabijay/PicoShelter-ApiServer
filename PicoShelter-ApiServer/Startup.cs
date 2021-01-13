@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Services;
@@ -17,7 +18,10 @@ using PicoShelter_ApiServer.FDAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
 using System;
+using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer
 {
@@ -33,11 +37,19 @@ namespace PicoShelter_ApiServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=picoshelterdb;Trusted_Connection=True;";
+            services.AddScoped<IUnitOfWork>(s => new EFUnitOfWork(connectionString));
+            services.AddScoped<IFileUnitOfWork>(s => new FileUnitOfWork("FileRepository"));
+            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IProfileService, ProfileService>();
+            services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IAlbumService, AlbumService>();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = false;
-                    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidIssuer = AuthOptions.Issuer,
@@ -50,15 +62,27 @@ namespace PicoShelter_ApiServer
                         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
                         ValidateIssuerSigningKey = true
                     };
-                });
+                    options.Events = new JwtBearerEvents()
+                    {
+                        OnTokenValidated = context =>
+                        {
+                            var token = context.SecurityToken as JwtSecurityToken;
+                            if (token != null)
+                            {
+                                var id = int.Parse(token.Claims.FirstOrDefault().Value);
+                                var db = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
+                                var acc = db.Accounts.Get(id);
+                                if (acc != null)
+                                {
+                                    if (acc.LastPasswordChange > token.ValidFrom)
+                                        context.Fail("Password was changed after login");
+                                }
+                            }
 
-            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=picoshelterdb;Trusted_Connection=True;";
-            services.AddScoped<IUnitOfWork>(s => new EFUnitOfWork(connectionString));
-            services.AddScoped<IFileUnitOfWork>(s => new FileUnitOfWork("FileRepository"));
-            services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<IProfileService, ProfileService>();
-            services.AddScoped<IImageService, ImageService>();
-            services.AddScoped<IAlbumService, AlbumService>();
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
 
             services.AddControllers();
             services.AddMvc()

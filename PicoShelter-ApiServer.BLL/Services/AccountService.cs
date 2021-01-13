@@ -5,6 +5,7 @@ using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Interfaces;
+using System;
 
 namespace PicoShelter_ApiServer.BLL.Services
 {
@@ -37,6 +38,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 Email = account.email,
                 Username = account.username,
                 Password = hashedPwd,
+                LastPasswordChange = DateTime.UtcNow,
                 RoleId = 1
             };
 
@@ -93,6 +95,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 throw new HandlingException(ExceptionType.CREDENTIALS_INCORRECT);
 
             account.Password = SecurePasswordHasher.Hash(dto.newPwd);
+            account.LastPasswordChange = DateTime.UtcNow;
             database.Accounts.Update(account);
             database.Save();
         }
