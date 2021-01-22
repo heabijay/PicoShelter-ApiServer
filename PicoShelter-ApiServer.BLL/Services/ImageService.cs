@@ -243,7 +243,8 @@ namespace PicoShelter_ApiServer.BLL.Services
                         image.Title = null;
 
                     image.IsPublic = dto.isPublic;
-                    image.DeleteIn = dto.deletein;
+                    if (dto.isChangeLifetime)
+                        image.DeleteIn = dto.deletein;
 
                     db.Images.Update(image);
                     db.Save();
