@@ -3,11 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PicoShelter_ApiServer.Requests.Models
 {
-    public record AlbumCreateAndShareModel : AlbumCreateModel
+    public record AlbumCreateAndShareModel : AlbumEditModel
     {
         public List<int> joinedPhotos { get; init; }
 
-        public AlbumCreateAndShareModel(List<int> joinedPhotos, [StringLength(64, ErrorMessage = "Title must be <= 64 length")] string title, [Required] bool isPublic) : base(title, isPublic)
+        public AlbumCreateAndShareModel(List<int> joinedPhotos, [StringLength(64, ErrorMessage = "Title must be <= 64 length")] string title, string userCode, [Required] bool isPublic) : base(title, userCode, isPublic)
         {
             this.joinedPhotos = joinedPhotos;
         }

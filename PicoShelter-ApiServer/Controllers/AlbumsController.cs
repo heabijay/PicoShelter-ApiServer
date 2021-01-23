@@ -59,6 +59,36 @@ namespace PicoShelter_ApiServer.Controllers
             return NotFound();
         }
 
+        [HttpPut("a/{albumCode}")]
+        public IActionResult EditAlbum([FromRoute] string albumCode, [FromBody]AlbumEditModel m)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return NotFound();
+
+            return EditAlbum(albumId.Value, m);
+        }
+
+        public IActionResult EditAlbum(int albumId, AlbumEditModel m)
+        {
+            int userId = int.Parse(User.Identity.Name);
+
+            var role = _albumService.GetUserRole(albumId, userId);
+            if (role != DAL.Enums.AlbumUserRole.admin)
+                return Forbid();
+
+            try
+            {
+                _albumService.EditAlbum(albumId, new(userId, m.title, m.userCode, m.isPublic));
+            }
+            catch (HandlingException ex)
+            {
+                return new ErrorResponse(ex);
+            }
+
+            return Ok();
+        }
+
 
         [AllowAnonymous]
         [HttpHead("a/{albumCode}/images")]
@@ -66,18 +96,6 @@ namespace PicoShelter_ApiServer.Controllers
         public IActionResult GetImages([FromRoute] string albumCode, [FromQuery] int? starts, [FromQuery] int? count)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return NotFound();
-
-            return GetImages(albumId.Value, starts, count);
-        }
-
-        [AllowAnonymous]
-        [HttpHead("s/{albumUserCode}/images")]
-        [HttpGet("s/{albumUserCode}/images")]
-        public IActionResult GetImagesByUsercode([FromRoute] string albumUserCode, [FromQuery] int? starts, [FromQuery] int? count)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
                 return NotFound();
 
@@ -109,18 +127,6 @@ namespace PicoShelter_ApiServer.Controllers
             return GetUsers(albumId.Value, starts, count);
         }
 
-        [AllowAnonymous]
-        [HttpHead("s/{albumUserCode}/users")]
-        [HttpGet("s/{albumUserCode}/users")]
-        public IActionResult GetUsersByUsercode([FromRoute] string albumUserCode, [FromQuery] int? starts, [FromQuery] int? count)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
-            if (albumId == null)
-                return NotFound();
-
-            return GetUsers(albumId.Value, starts, count);
-        }
-
         private IActionResult GetUsers(int id, int? starts, int? count)
         {
             string idStr = User?.Identity?.Name;
@@ -140,18 +146,6 @@ namespace PicoShelter_ApiServer.Controllers
         public IActionResult GetImageInfo(string albumCode, string imageCode)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return NotFound();
-
-            return GetImageInfo(albumId.Value, imageCode);
-        }
-
-        [AllowAnonymous]
-        [HttpHead("s/{albumUserCode}/{imageCode}")]
-        [HttpGet("s/{albumUserCode}/{imageCode}")]
-        public IActionResult GetImageInfoByUsercode(string albumUserCode, string imageCode)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
                 return NotFound();
 
@@ -288,16 +282,6 @@ namespace PicoShelter_ApiServer.Controllers
             return AddImages(albumId.Value, addImages);
         }
 
-        [HttpPost("s/{albumUserCode}/addimages")]
-        public IActionResult AddImagesByUsercode(string albumUserCode, List<int> addImages)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
-            if (albumId == null)
-                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
-
-            return AddImages(albumId.Value, addImages);
-        }
-
         private IActionResult AddImages(int albumId, List<int> addImages)
         {
             int userId = int.Parse(User.Identity.Name);
@@ -323,16 +307,6 @@ namespace PicoShelter_ApiServer.Controllers
         public IActionResult DeleteImages(string albumCode, List<int> deleteImages)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
-
-            return DeleteImages(albumId.Value, deleteImages);
-        }
-
-        [HttpDelete("s/{albumUserCode}/deleteimages")]
-        public IActionResult DeleteImagesByUsercode(string albumUserCode, List<int> deleteImages)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
                 return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
@@ -370,16 +344,6 @@ namespace PicoShelter_ApiServer.Controllers
             return AddMembers(albumId.Value, addMembers);
         }
 
-        [HttpPost("s/{albumUserCode}/addmembers")]
-        public IActionResult AddMembersByUsercode(string albumUserCode, List<int> addMembers)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
-            if (albumId == null)
-                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
-
-            return AddMembers(albumId.Value, addMembers);
-        }
-
         private IActionResult AddMembers(int albumId, List<int> addMembers)
         {
             int userId = int.Parse(User.Identity.Name);
@@ -405,16 +369,6 @@ namespace PicoShelter_ApiServer.Controllers
         public IActionResult ChangeRole(string albumCode, [FromBody] AlbumChangeRoleModel m)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
-
-            return ChangeRole(albumId.Value, m);
-        }
-
-        [HttpPut("s/{albumUserCode}/changerole")]
-        public IActionResult ChangeRoleByUsercode(string albumUserCode, [FromBody] AlbumChangeRoleModel m)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
                 return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
@@ -452,16 +406,6 @@ namespace PicoShelter_ApiServer.Controllers
             return DeleteMembers(albumId.Value, deleteMembers);
         }
 
-        [HttpDelete("s/{albumUserCode}/deletemembers")]
-        public IActionResult DeleteMembersByUsercode(string albumUserCode, List<int> deleteMembers)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
-            if (albumId == null)
-                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
-
-            return DeleteMembers(albumId.Value, deleteMembers);
-        }
-
         private IActionResult DeleteMembers(int albumId, List<int> deleteMembers)
         {
             int userId = int.Parse(User.Identity.Name);
@@ -489,16 +433,6 @@ namespace PicoShelter_ApiServer.Controllers
         public IActionResult DeleteAlbum(string albumCode)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
-
-            return DeleteAlbum(albumId.Value);
-        }
-
-        [HttpDelete("s/{albumUserCode}/deleteAlbum")]
-        public IActionResult DeleteAlbumByUsercode(string albumUserCode)
-        {
-            var albumId = _albumService.GetAlbumIdByUserCode(albumUserCode);
             if (albumId == null)
                 return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 

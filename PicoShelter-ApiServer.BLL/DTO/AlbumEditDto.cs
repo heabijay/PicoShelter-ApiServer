@@ -1,8 +1,9 @@
 ﻿namespace PicoShelter_ApiServer.BLL.DTO
 {
-    public record AlbumCreateDto(
+    public record AlbumEditDto(
         int ownerId,
         string title,
+        string userCode,
         bool isPublic
     );
 }

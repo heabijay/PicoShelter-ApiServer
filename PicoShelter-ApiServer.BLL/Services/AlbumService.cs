@@ -22,12 +22,17 @@ namespace PicoShelter_ApiServer.BLL.Services
             db = unit;
             _imageService = imageService;
         }
-        public int CreateAlbum(AlbumCreateDto dto)
+        public int CreateAlbum(AlbumEditDto dto)
         {
+            var isUsercodeRegistered = db.Albums.Any(t => t.UserCode?.Equals(dto.userCode, StringComparison.OrdinalIgnoreCase) ?? false);
+            if (isUsercodeRegistered)
+                throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
+
             var entity = new AlbumEntity()
             {
                 IsPublic = dto.isPublic,
-                Title = dto.title
+                Title = dto.title,
+                UserCode = dto.userCode
             };
             db.Albums.Add(entity);
             db.Save();
@@ -46,6 +51,39 @@ namespace PicoShelter_ApiServer.BLL.Services
             return entity.Id;
         }
 
+        public void SetUsercode(int albumId, string usercode)
+        {
+            var isExist = db.Albums.Any(t => t.UserCode.Equals(usercode, StringComparison.OrdinalIgnoreCase));
+            if (isExist)
+                throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
+
+            var album = db.Albums.Get(albumId);
+            album.Code = usercode;
+            db.Albums.Update(album);
+            db.Save();
+        }
+
+        public void EditAlbum(int albumId, AlbumEditDto dto)
+        {
+            var album = db.Albums.Get(albumId);
+            if (album == null)
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
+
+            if (dto.userCode != null && !dto.userCode.Equals(album.UserCode, StringComparison.OrdinalIgnoreCase))
+            {
+                var isExist = db.Albums.Any(t => t.UserCode.Equals(dto.userCode, StringComparison.OrdinalIgnoreCase));
+                if (isExist)
+                    throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
+            }
+
+            album.Title = dto.title;
+            album.UserCode = dto.userCode;
+            album.IsPublic = dto.isPublic;
+
+            db.Albums.Update(album);
+            db.Save();
+        }
+
         public void DeleteAlbum(int id)
         {
             db.Albums.Delete(id);
@@ -59,7 +97,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public int? GetAlbumIdByUserCode(string userCode)
         {
-            return db.Albums.FirstOrDefault(t => t.UserCode.Equals(userCode, StringComparison.OrdinalIgnoreCase))?.Id;
+            return db.Albums.FirstOrDefault(t => t.UserCode?.Equals(userCode, StringComparison.OrdinalIgnoreCase) ?? false)?.Id;
         }
 
         public bool VerifyImageOwner(int ownerId, int imageId)
@@ -180,18 +218,6 @@ namespace PicoShelter_ApiServer.BLL.Services
             profileAlbum.Role = role;
 
             db.ProfileAlbums.Update(profileAlbum);
-            db.Save();
-        }
-
-        public void SetUsercode(int albumId, string usercode)
-        {
-            var isExist = db.Albums.Any(t => t.UserCode.Equals(usercode, StringComparison.OrdinalIgnoreCase));
-            if (isExist)
-                throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
-
-            var album = db.Albums.Get(albumId);
-            album.Code = usercode;
-            db.Albums.Update(album);
             db.Save();
         }
 

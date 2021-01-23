@@ -20,14 +20,24 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult CreateAlbum([FromBody]AlbumCreateModel m)
+        public IActionResult CreateAlbum([FromBody]AlbumEditModel m)
         {
             int userId = int.Parse(User.Identity.Name);
 
-            var dto = new AlbumCreateDto(userId, m.title, m.isPublic);
-            var id = _albumService.CreateAlbum(dto);
+            var dto = new AlbumEditDto(userId, m.title, m.userCode, m.isPublic);
+            int id;
+            try
+            {
+                id = _albumService.CreateAlbum(dto);
+            }
+            catch (HandlingException ex)
+            {
+                return new ErrorResponse(ex);
+            }
 
-            return Ok();
+            var result = _albumService.GetAlbumInfo(id, userId);
+
+            return new SuccessResponse(result);
         }
 
         [HttpPost("create-and-share")]
@@ -41,12 +51,21 @@ namespace PicoShelter_ApiServer.Controllers
                     return new ErrorResponse(ExceptionType.YOU_NOT_OWNER_OF_IMAGE, joinedid);
             }
 
-            var dto = new AlbumCreateDto(userId, m.title, m.isPublic);
-            var id = _albumService.CreateAlbum(dto);
+            var dto = new AlbumEditDto(userId, m.title, m.userCode, m.isPublic);
+            int id;
+            try
+            {
+                id = _albumService.CreateAlbum(dto);
+            }
+            catch (HandlingException ex)
+            {
+                return new ErrorResponse(ex);
+            }
 
             _albumService.AddImages(id, userId, m.joinedPhotos.ToArray());
+            var result = _albumService.GetAlbumInfo(id, userId);
 
-            return Ok();
+            return new SuccessResponse(result);
         }
     }
 }
