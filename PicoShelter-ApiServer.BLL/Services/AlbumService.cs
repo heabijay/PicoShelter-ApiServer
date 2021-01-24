@@ -268,12 +268,15 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
                 if (validator.Validate())
+                {
+                    var previewImage = album.AlbumImages.FirstOrDefault()?.Image;
                     return new(
                         albumId,
                         album.Code,
                         album.Title,
                         album.UserCode,
                         album.IsPublic,
+                        previewImage == null ? null : new(previewImage.Id, previewImage.ImageCode, previewImage.Extension, previewImage.Title, previewImage.IsPublic),
                         album.CreatedDateUTC,
                         album.AlbumImages
                             .Select(t => t.Image)
@@ -304,6 +307,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                              ))
                             .ToList()
                     );
+                }
             }
 
             return null;

@@ -105,7 +105,16 @@ namespace PicoShelter_ApiServer.BLL.Services
                 return new(
                     accDto,
                     new(listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList(), summaryImages),
-                    new(listAlbums == null ? null : listAlbums.Select(t => new AlbumShortInfoDto(t.Id, t.Code, t.Title)).ToList(), summaryAlbums)
+                    new(listAlbums == null ? null : listAlbums.Select(t =>
+                    {
+                        var previewImage = t.AlbumImages.FirstOrDefault()?.Image;
+                        return new AlbumShortInfoDto(
+                            t.Id,
+                            t.Code,
+                            t.Title,
+                            previewImage == null ? null : new(previewImage.Id, previewImage.ImageCode, previewImage.Extension, previewImage.Title, previewImage.IsPublic)
+                        );
+                    }).ToList(), summaryAlbums)
                 );
             }
 
@@ -149,7 +158,16 @@ namespace PicoShelter_ApiServer.BLL.Services
                     listAlbums = listAlbums.Reverse();
                     listAlbums = listAlbums.Pagination(starts, count, out int summary);
 
-                    var dtos = listAlbums.Select(t => new AlbumShortInfoDto(t.Id, t.Code, t.Title)).ToList();
+                    var dtos = listAlbums.Select(t =>
+                    {
+                        var previewImage = t.AlbumImages.FirstOrDefault()?.Image;
+                        return new AlbumShortInfoDto(
+                            t.Id,
+                            t.Code,
+                            t.Title,
+                            previewImage == null ? null : new(previewImage.Id, previewImage.ImageCode, previewImage.Extension, previewImage.Title, previewImage.IsPublic)
+                        );
+                    }).ToList();
                     return new PaginationResultDto<AlbumShortInfoDto>(dtos, summary);
                 }
 

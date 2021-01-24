@@ -3,6 +3,7 @@
     public record AlbumShortInfoDto(
         int id,
         string code,
-        string title
+        string title,
+        ImageShortInfoDto previewImage
     );
 }

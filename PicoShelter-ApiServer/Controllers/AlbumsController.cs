@@ -69,7 +69,7 @@ namespace PicoShelter_ApiServer.Controllers
             return EditAlbum(albumId.Value, m);
         }
 
-        public IActionResult EditAlbum(int albumId, AlbumEditModel m)
+        private IActionResult EditAlbum(int albumId, AlbumEditModel m)
         {
             int userId = int.Parse(User.Identity.Name);
 

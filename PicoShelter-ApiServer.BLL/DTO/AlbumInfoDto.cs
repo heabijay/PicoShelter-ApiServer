@@ -9,6 +9,7 @@ namespace PicoShelter_ApiServer.BLL.DTO
         string title,
         string usercode,
         bool isPublic,
+        ImageShortInfoDto previewImage,
         DateTime createdDate,
         List<ImageShortInfoDto> images,
         List<AlbumProfileInfoDto> users
