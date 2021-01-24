@@ -269,6 +269,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
                 if (validator.Validate())
                 {
+                    var role = album.ProfileAlbums.FirstOrDefault(t => t.ProfileId == requesterId)?.Role;
                     var previewImage = album.AlbumImages.FirstOrDefault()?.Image;
                     return new(
                         albumId,
@@ -278,10 +279,11 @@ namespace PicoShelter_ApiServer.BLL.Services
                         album.IsPublic,
                         previewImage == null ? null : new(previewImage.Id, previewImage.ImageCode, previewImage.Extension, previewImage.Title, previewImage.IsPublic),
                         album.CreatedDateUTC,
-                        album.AlbumImages
+                        role,
+                        new(album.AlbumImages
                             .Select(t => t.Image)
                             .Reverse()
-                            .Take(10)
+                            .Pagination(null, 12, out int summaryAlbumImages)
                             .Select(t => new ImageShortInfoDto(
                                 t.Id,
                                 t.ImageCode,
@@ -290,9 +292,11 @@ namespace PicoShelter_ApiServer.BLL.Services
                                 t.IsPublic
                             ))
                             .ToList(),
-                        album.ProfileAlbums
+                            summaryAlbumImages
+                        ),
+                        new(album.ProfileAlbums
                             .Reverse<ProfileAlbumEntity>()
-                            .Take(10)
+                            .Pagination(null, 12, out int summaryProfileAlbums)
                             .Select(t => new AlbumProfileInfoDto(
                                 new(
                                     t.Profile.AccountId,
@@ -305,7 +309,9 @@ namespace PicoShelter_ApiServer.BLL.Services
                                 ),
                                 t.Role
                              ))
-                            .ToList()
+                            .ToList(),
+                            summaryProfileAlbums
+                        )
                     );
                 }
             }

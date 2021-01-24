@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PicoShelter_ApiServer.DAL.Enums;
+using System;
 using System.Collections.Generic;
 
 namespace PicoShelter_ApiServer.BLL.DTO
@@ -11,7 +12,8 @@ namespace PicoShelter_ApiServer.BLL.DTO
         bool isPublic,
         ImageShortInfoDto previewImage,
         DateTime createdDate,
-        List<ImageShortInfoDto> images,
-        List<AlbumProfileInfoDto> users
+        AlbumUserRole? accessRole,
+        PaginationResultDto<ImageShortInfoDto> images,
+        PaginationResultDto<AlbumProfileInfoDto> users
     );
 }
