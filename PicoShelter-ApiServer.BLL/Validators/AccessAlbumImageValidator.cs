@@ -11,8 +11,9 @@ namespace PicoShelter_ApiServer.BLL.Validators
 
         public virtual bool Validate()
         {
-            if (RefererAlbum.AlbumImages.Find(t => t.ImageId == ImageEntity.Id) == null)
-                return false;
+            if (ImageEntity != null)
+                if (RefererAlbum.AlbumImages.Find(t => t.ImageId == ImageEntity.Id) == null)
+                    return false;
 
             if (RefererAlbum.IsPublic)
                 return true;
