@@ -297,18 +297,22 @@ namespace PicoShelter_ApiServer.BLL.Services
                         new(album.ProfileAlbums
                             .Reverse<ProfileAlbumEntity>()
                             .Pagination(null, 12, out int summaryProfileAlbums)
-                            .Select(t => new AlbumProfileInfoDto(
+                            .Select(t =>
+                            {
+                                var profile = db.Profiles.Get(t.ProfileId);
+                                return new AlbumProfileInfoDto(
                                 new(
-                                    t.Profile.AccountId,
-                                    t.Profile.Account.Username,
+                                    profile.AccountId,
+                                    profile.Account?.Username,
                                     new(
-                                        t.Profile.Firstname,
-                                        t.Profile.Lastname
+                                        profile.Firstname,
+                                        profile.Lastname
                                     ),
-                                    t.Profile.Account.Role.Name
+                                    profile.Account?.Role?.Name
                                 ),
                                 t.Role
-                             ))
+                                );
+                            })
                             .ToList(),
                             summaryProfileAlbums
                         )
