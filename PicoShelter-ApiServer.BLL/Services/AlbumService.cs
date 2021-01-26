@@ -269,7 +269,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
                 if (validator.Validate())
                 {
-                    var role = album.ProfileAlbums.FirstOrDefault(t => t.ProfileId == requesterId)?.Role;
+                    var role = album.ProfileAlbums.FirstOrDefault(t => t.ProfileId == requesterId)?.Role ?? DAL.Enums.AlbumUserRole.viewer;
                     var previewImage = album.AlbumImages.FirstOrDefault()?.Image;
                     return new(
                         albumId,

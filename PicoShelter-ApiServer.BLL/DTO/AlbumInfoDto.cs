@@ -12,7 +12,7 @@ namespace PicoShelter_ApiServer.BLL.DTO
         bool isPublic,
         ImageShortInfoDto previewImage,
         DateTime createdDate,
-        AlbumUserRole? accessRole,
+        AlbumUserRole accessRole,
         PaginationResultDto<ImageShortInfoDto> images,
         PaginationResultDto<AlbumProfileInfoDto> users
     );
