@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace PicoShelter_ApiServer.Requests.Models
 {
     public record UploadFormModel(
-        [StringLength(32, ErrorMessage = "Max length of Title = 32")] string title,
+        [StringLength(64, ErrorMessage = "Max length of Title = 64")] string title,
         [Required(ErrorMessage = "You're not attach an image.")] IFormFile file,
         List<int> JoinToAlbums,
         [Range(1, 720, ErrorMessage = "Bad range. Use 1..720 hours or null value for infinity")] int? deleteInHours,

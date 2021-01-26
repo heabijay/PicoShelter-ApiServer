@@ -3,7 +3,7 @@
 namespace PicoShelter_ApiServer.Requests.Models
 {
     public record ImageEditModel(
-        [StringLength(32, ErrorMessage = "Max length of Title = 32")]
+        [StringLength(64, ErrorMessage = "Max length of Title = 64")]
         string title,
         [Required]
         bool isChangeLifetime,
