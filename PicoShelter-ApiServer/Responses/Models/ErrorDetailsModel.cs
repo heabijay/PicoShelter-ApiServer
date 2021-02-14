@@ -1,5 +1,5 @@
-﻿using PicoShelter_ApiServer.BLL.Infrastructure;
-using PicoShelter_ApiServer.Extensions;
+﻿using PicoShelter_ApiServer.BLL.Extensions;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 
 namespace PicoShelter_ApiServer.Responses.Models
 {

@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Services;
 using PicoShelter_ApiServer.DAL;
@@ -17,10 +19,13 @@ using PicoShelter_ApiServer.FDAL;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
+using PicoShelter_ApiServer.Services;
 using System;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer
@@ -33,17 +38,40 @@ namespace PicoShelter_ApiServer
         }
 
         public IConfiguration Configuration { get; }
-
+        
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=picoshelterdb;Trusted_Connection=True;";
-            services.AddScoped<IUnitOfWork>(s => new EFUnitOfWork(connectionString));
-            services.AddScoped<IFileUnitOfWork>(s => new FileUnitOfWork("FileRepository"));
+            var connectionStrings = Configuration.GetSection("ConnectionStrings");
+            var defaultConnectionString = connectionStrings.GetValue<string>("DefaultConnection");
+
+            var smtpServers = Configuration.GetSection("SmtpServers");
+            var defaultSmtpServer = smtpServers.GetSection("DefaultServer");
+            var defaultSmtpServerAuth = defaultSmtpServer.GetSection("Authorization");
+
+            var defaultSmtpServerConfig = new EmailAuthDto(
+                host: defaultSmtpServer.GetValue<string>("Host"),
+                port: defaultSmtpServer.GetValue<int>("Port"),
+                useSsl: defaultSmtpServer.GetValue<bool>("UseSsl"),
+                username: defaultSmtpServerAuth.GetValue<string>("Username"),
+                password: defaultSmtpServerAuth.GetValue<string>("Password"),
+
+                from: new(
+                    name: "PicoShelter",
+                    address: defaultSmtpServer.GetValue<string>("FromAddress")
+                )
+            );
+
+            services.AddScoped<IUnitOfWork>(s => new EFUnitOfWork(defaultConnectionString));
+            services.AddScoped<IFileUnitOfWork>(s => new FileUnitOfWork(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FileRepository")));
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IProfileService, ProfileService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IAlbumService, AlbumService>();
+            services.AddScoped<IEmailService>(s => new EmailService(defaultSmtpServerConfig, s.GetService<ILogger<IEmailService>>()));
+            services.AddScoped<IConfirmationService, ConfirmationService>();
+
+            services.AddHostedService<AutoCleanupService>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

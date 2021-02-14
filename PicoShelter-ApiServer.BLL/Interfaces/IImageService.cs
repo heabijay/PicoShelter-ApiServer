@@ -23,6 +23,7 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public int? GetImageIdByCode(string code);
         public ImageInfoDto GetImageInfo(string code, IValidator validator);
         public void DeleteImage(string code, int requesterId);
+        public void ForceDeleteImage(string code);
         public void EditImage(string code, int requesterId, ImageEditDto dto);
         public void ChangeIsPublicImage(string code, int requesterId, bool isPublic);
     }

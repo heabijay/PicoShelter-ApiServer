@@ -22,34 +22,50 @@ namespace PicoShelter_ApiServer.BLL.Services
         public bool TokenCheckPasswordChange(int id, DateTime validFrom)
         {
             var acc = database.Accounts.Get(id);
-            if (acc.LastPasswordChange > validFrom)
+            if (acc?.LastCredentialsChange > validFrom)
                 return false;
 
             return true;
         }
 
-        public void Register(AccountDto _account)
-        {
-            var account = _account with { username = _account.username.Trim(), email = _account.email.Trim() };
 
-            var usernameRegistered = database.Accounts.Any(t => t.Username.Equals(account.username, System.StringComparison.OrdinalIgnoreCase));
+        public void RegisterValidation(string username, string email)
+        {
+            var usernameRegistered = database.Accounts.Any(t => t.Username.Equals(username, System.StringComparison.OrdinalIgnoreCase));
             if (usernameRegistered)
                 throw new HandlingException(ExceptionType.USERNAME_ALREADY_REGISTERED);
 
-            var emailRegistered = database.Accounts.Any(t => t.Email.Equals(account.email, System.StringComparison.OrdinalIgnoreCase));
+            var emailRegistered = database.Accounts.Any(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
             if (emailRegistered)
                 throw new HandlingException(ExceptionType.EMAIL_ALREADY_REGISTERED);
+        }
 
+        public AccountEntity RegisterCreateEntity(AccountDto account)
+        {
             var hashedPwd = SecurePasswordHasher.Hash(account.password);
 
-            var accountEntity = new AccountEntity()
+            return new AccountEntity()
             {
                 Email = account.email,
                 Username = account.username,
                 Password = hashedPwd,
-                LastPasswordChange = DateTime.UtcNow,
+                LastCredentialsChange = DateTime.UtcNow,
                 RoleId = 1
             };
+        }
+
+        public void Register(AccountDto _account)
+        {
+            var account = _account with { username = _account.username.Trim(), email = _account.email.Trim() };
+            RegisterValidation(account.username, account.email);
+            var accountEntity = RegisterCreateEntity(_account);
+
+            Register(accountEntity);
+        }
+
+        public void Register(AccountEntity accountEntity)
+        {
+            RegisterValidation(accountEntity.Username, accountEntity.Email);
 
             database.Accounts.Add(accountEntity);
             database.Save();
@@ -93,6 +109,12 @@ namespace PicoShelter_ApiServer.BLL.Services
             return null;
         }
 
+        public int? GetAccountId(string username)
+        {
+            var account = database.Accounts.FirstOrDefault(t => t.Username.Equals(username, System.StringComparison.OrdinalIgnoreCase));
+            return account?.Id;
+        }
+
         public void ChangePassword(AccountChangePasswordDto dto)
         {
             var account = database.Accounts.Get(dto.id);
@@ -104,7 +126,40 @@ namespace PicoShelter_ApiServer.BLL.Services
                 throw new HandlingException(ExceptionType.CREDENTIALS_INCORRECT);
 
             account.Password = SecurePasswordHasher.Hash(dto.newPwd);
-            account.LastPasswordChange = DateTime.UtcNow;
+            account.LastCredentialsChange = DateTime.UtcNow;
+            database.Accounts.Update(account);
+            database.Save();
+        }
+
+        public void ForceSetPassword(int id, string newPwd)
+        {
+            var account = database.Accounts.Get(id);
+            if (account == null)
+                throw new HandlingException(ExceptionType.USER_NOT_FOUND);
+
+            account.Password = SecurePasswordHasher.Hash(newPwd);
+            account.LastCredentialsChange = DateTime.UtcNow;
+            database.Accounts.Update(account);
+            database.Save();
+        }
+
+        public string GetEmail(int accountId)
+        {
+            var account = database.Accounts.Get(accountId);
+            if (account == null)
+                throw new HandlingException(ExceptionType.USER_NOT_FOUND);
+
+            return account.Email;
+        }
+
+        public void ChangeEmail(int accountId, string newEmail)
+        {
+            var account = database.Accounts.Get(accountId);
+            if (account == null)
+                throw new HandlingException(ExceptionType.USER_NOT_FOUND);
+
+            account.Email = newEmail;
+            account.LastCredentialsChange = DateTime.UtcNow;
             database.Accounts.Update(account);
             database.Save();
         }

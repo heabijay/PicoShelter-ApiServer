@@ -12,6 +12,7 @@ namespace PicoShelter_ApiServer.DAL.EF
         public DbSet<AlbumEntity> Albums { get; set; }
         public DbSet<ProfileAlbumEntity> ProfileAlbums { get; set; }
         public DbSet<AlbumImageEntity> AlbumImages { get; set; }
+        public DbSet<ConfirmationEntity> Confirmations { get; set; }
 
         private string _connectionString;
         public ApplicationContext(string connectionString) : base()

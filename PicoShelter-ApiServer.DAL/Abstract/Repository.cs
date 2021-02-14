@@ -71,7 +71,7 @@ namespace PicoShelter_ApiServer.DAL.Abstract
             }
         }
 
-        public T[] Where(Func<T, bool> predicate)
+        public virtual T[] Where(Func<T, bool> predicate)
         {
             lock (locker)
             {

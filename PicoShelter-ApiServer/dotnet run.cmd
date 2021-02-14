@@ -1,1 +1,1 @@
-dotnet run --urls "http://0.0.0.0:5000"
+dotnet run --urls "https://0.0.0.0:5000"

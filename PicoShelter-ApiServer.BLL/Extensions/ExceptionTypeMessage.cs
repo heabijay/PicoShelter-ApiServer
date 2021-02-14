@@ -1,7 +1,7 @@
 ﻿using PicoShelter_ApiServer.BLL.Infrastructure;
 using System.Collections.Generic;
 
-namespace PicoShelter_ApiServer.Extensions
+namespace PicoShelter_ApiServer.BLL.Extensions
 {
     public static class ExceptionTypeMessage
     {
@@ -71,6 +71,14 @@ namespace PicoShelter_ApiServer.Extensions
             {
                 ExceptionType.UNREGISTERED_JOINTOALBUM_FORBIDDEN,
                 "Join to albums not available for unregistered users."
+            },
+            {
+                ExceptionType.CURRENT_EMAIL_WAS_ALREADY_CHANGED,
+                "Current email was already changed since confirmation token was created"
+            },
+            {
+                ExceptionType.CONFIRMATIONTYPE_UNSUPPORTED,
+                "Selected confirmation type is unsupported for this method"
             }
         };
 

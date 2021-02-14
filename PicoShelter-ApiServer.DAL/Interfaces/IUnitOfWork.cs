@@ -12,6 +12,7 @@ namespace PicoShelter_ApiServer.DAL.Interfaces
         public IRepository<ProfileEntity> Profiles { get; }
         public IRepository<ProfileAlbumEntity> ProfileAlbums { get; }
         public IRepository<RoleEntity> Roles { get; }
+        public IRepository<ConfirmationEntity> Confirmations { get; }
 
         public void Save();
     }

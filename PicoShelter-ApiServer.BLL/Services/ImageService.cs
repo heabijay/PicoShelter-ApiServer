@@ -109,6 +109,14 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = db.Images.Get(id.Value);
+
+                // Auto Delete Check
+                if (image.DeleteIn < DateTime.UtcNow)
+                {
+                    ForceDeleteImage(code);
+                    return GetImage(code, extension, validator, out typeExtension);
+                }
+
                 var ext = extension.Replace("jpg", "jpeg", StringComparison.OrdinalIgnoreCase);
 
                 if (image.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase))
@@ -146,6 +154,13 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 var image = db.Images.Get(id.Value);
 
+                // Auto Delete Check
+                if (image.DeleteIn < DateTime.UtcNow)
+                {
+                    ForceDeleteImage(code);
+                    return GetThumbnail(code, validator);
+                }
+
                 validator.ImageEntity = image;
 
                 if (validator.Validate())
@@ -182,6 +197,14 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = db.Images.Get(id.Value);
+
+                // Auto Delete Check
+                if (image.DeleteIn < DateTime.UtcNow)
+                {
+                    ForceDeleteImage(code);
+                    return GetImageInfo(code, validator);
+                }
+
                 validator.ImageEntity = image;
                 if (validator.Validate())
                 {
@@ -215,13 +238,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 var image = db.Images.Get(id.Value);
                 if (image.ProfileId == requesterId)
                 {
-                    var filesProfile = files.Profiles.GetOrCreate(image.ProfileId.Value);
-                    filesProfile.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
-                    filesProfile.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
-
-                    db.Images.Delete(id.Value);
-                    db.Save();
-                    return;
+                    ForceDeleteImage(code);
                 }
 
                 throw new UnauthorizedAccessException();
@@ -230,12 +247,38 @@ namespace PicoShelter_ApiServer.BLL.Services
             throw new FileNotFoundException();
         }
 
+        public void ForceDeleteImage(string code)
+        {
+            var id = GetImageIdByCode(code);
+            if (id != null)
+            {
+                var image = db.Images.Get(id.Value);
+                var filesProfile = files.Profiles.GetOrCreate(image.ProfileId.Value);
+                filesProfile.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
+                filesProfile.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
+
+                db.Images.Delete(id.Value);
+                db.Save();
+                return;
+            }
+        }
+
+
         public void EditImage(string code, int requesterId, ImageEditDto dto)
         {
             var id = GetImageIdByCode(code);
             if (id != null)
             {
                 var image = db.Images.Get(id.Value);
+
+                // Auto Delete Check
+                if (image.DeleteIn < DateTime.UtcNow)
+                {
+                    ForceDeleteImage(code);
+                    EditImage(code, requesterId, dto);
+                    return;
+                }
+
                 if (image.ProfileId == requesterId)
                 {
                     image.Title = dto.title;
