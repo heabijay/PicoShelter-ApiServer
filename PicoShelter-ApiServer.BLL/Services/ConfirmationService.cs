@@ -174,6 +174,9 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (!data.currentEmail.Equals(currentEmail, StringComparison.OrdinalIgnoreCase))
                 throw new HandlingException(ExceptionType.CURRENT_EMAIL_WAS_ALREADY_CHANGED);
 
+            if (_accountService.IsEmailAlreadyRegistered(data.newEmail))
+                throw new HandlingException(ExceptionType.EMAIL_ALREADY_REGISTERED);
+
             _accountService.ChangeEmail(dto.AccountId.Value, data.newEmail);
 
             db.Confirmations.Delete(dto.Id);

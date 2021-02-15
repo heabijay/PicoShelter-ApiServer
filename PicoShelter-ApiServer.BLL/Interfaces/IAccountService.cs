@@ -7,6 +7,7 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
     public interface IAccountService
     {
         public bool TokenCheckPasswordChange(int id, DateTime validFrom);
+        public bool IsEmailAlreadyRegistered(string email);
         public void Register(AccountDto account);
         public void Register(AccountEntity accountEntity);
         public void RegisterValidation(string username, string email);

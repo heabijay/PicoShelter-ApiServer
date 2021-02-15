@@ -129,6 +129,9 @@ namespace PicoShelter_ApiServer.Controllers
             try
             {
                 var acc = _accountService.GetAccountInfo(id);
+                if (_accountService.IsEmailAlreadyRegistered(newEmail))
+                    throw new HandlingException(ExceptionType.EMAIL_ALREADY_REGISTERED);
+
                 var current = _accountService.GetEmail(id);
                 int timeout = 20;
                 var token = _confirmationService.CreateEmailChanging(id, new(current, newEmail), timeout);

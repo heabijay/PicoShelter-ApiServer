@@ -29,13 +29,18 @@ namespace PicoShelter_ApiServer.BLL.Services
         }
 
 
+        public bool IsEmailAlreadyRegistered(string email)
+        {
+            return database.Accounts.Any(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
+        }
+
         public void RegisterValidation(string username, string email)
         {
             var usernameRegistered = database.Accounts.Any(t => t.Username.Equals(username, System.StringComparison.OrdinalIgnoreCase));
             if (usernameRegistered)
                 throw new HandlingException(ExceptionType.USERNAME_ALREADY_REGISTERED);
 
-            var emailRegistered = database.Accounts.Any(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
+            var emailRegistered = IsEmailAlreadyRegistered(email);
             if (emailRegistered)
                 throw new HandlingException(ExceptionType.EMAIL_ALREADY_REGISTERED);
         }
