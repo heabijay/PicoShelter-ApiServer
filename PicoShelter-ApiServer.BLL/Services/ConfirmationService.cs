@@ -143,7 +143,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             );
         }
 
-        public void ConfirmEmailChanging(int? requesterId, string key, int timeout = 20)
+        public string ConfirmEmailChanging(int? requesterId, string key, int timeout = 20)
         {
             var dto = GetConfirmationEntity(key);
 
@@ -153,10 +153,13 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (dto.Type != ConfirmationType.EmailChanging)
                 throw new InvalidCastException();
 
-            CreateEmailChangingNew(dto.AccountId.Value, JsonSerializer.Deserialize<AccountChangeEmailDto>(dto.Data), timeout);
+            var accId = dto.AccountId.Value;
+            var data = dto.Data;
 
             db.Confirmations.Delete(dto.Id);
             db.Save();
+
+            return CreateEmailChangingNew(accId, JsonSerializer.Deserialize<AccountChangeEmailDto>(data), timeout);
         }
 
         public void ConfirmEmailChangingNew(int? requesterId, string key)

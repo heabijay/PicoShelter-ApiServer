@@ -14,7 +14,7 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public void ConfirmEmailRegistration(string key);
         public string CreateEmailChanging(int accountId, AccountChangeEmailDto dto, int timeout = 20);
         public string CreateEmailChangingNew(int accountId, AccountChangeEmailDto dto, int timeout = 20);
-        public void ConfirmEmailChanging(int? requesterId, string key, int timeout = 20);
+        public string ConfirmEmailChanging(int? requesterId, string key, int timeout = 20);
         public void ConfirmEmailChangingNew(int? requesterId, string key);
         public string CreatePasswordReset(int accountToResetId, int timeout = 20);
         public void ConfirmPasswordReset(string key, string newPassword);

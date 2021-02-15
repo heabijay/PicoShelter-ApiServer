@@ -32,7 +32,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpHead("confirm")]
         [HttpGet("confirm")]
-        public IActionResult Confirm([FromQuery][Required]string key)
+        public async Task<IActionResult> Confirm([FromQuery][Required]string key)
         {
             string idStr = User?.Identity?.Name;
             int? id = idStr == null ? null : int.Parse(idStr);
@@ -50,18 +50,17 @@ namespace PicoShelter_ApiServer.Controllers
                 {
                     case DAL.Enums.ConfirmationType.EmailChanging:
                         var timeout = 20;
-                        _confirmationService.ConfirmEmailChanging(id, key, 20);
+                        var newKey = _confirmationService.ConfirmEmailChanging(id, key, 20);
                         var emailDto = JsonSerializer.Deserialize<AccountChangeEmailDto>(data);
                         var acc = _accountService.GetAccountInfo(id.Value);
-                        _emailService.SendEmailChangingNewEmailAsync(new()
+                        await _emailService.SendEmailChangingNewEmailAsync(new()
                         {
                             targetEmail = emailDto.newEmail,
                             oldEmail = emailDto.currentEmail,
                             timeoutMinutes = timeout,
                             username = acc.username,
                             homeUrl = _configuration.GetSection("WebApp").GetSection("Default").GetValue<string>("HomeUrl"),
-                            emailConfirmLink = _configuration.GetSection("WebApp").GetSection("Default").GetValue<string>("ConfirmEndpoint") + key,
-                            
+                            emailConfirmLink = _configuration.GetSection("WebApp").GetSection("Default").GetValue<string>("ConfirmEndpoint") + newKey,
                         });
                         break;
                     case DAL.Enums.ConfirmationType.EmailChangingNew:
