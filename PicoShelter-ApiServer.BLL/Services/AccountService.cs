@@ -164,7 +164,6 @@ namespace PicoShelter_ApiServer.BLL.Services
                 throw new HandlingException(ExceptionType.USER_NOT_FOUND);
 
             account.Email = newEmail;
-            account.LastCredentialsChange = DateTime.UtcNow;
             database.Accounts.Update(account);
             database.Save();
         }
