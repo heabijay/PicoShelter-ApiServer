@@ -28,31 +28,37 @@ namespace PicoShelter_ApiServer.Services
 
         private void DoWork(object obj)
         {
-            var db = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-            var _imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
-
-            // Images auto-delete task
-
-            var now = DateTime.UtcNow;
-            var images = db.Images.Where(t => t.DeleteIn <= now);
-            _logger.LogInformation($"Cleanup task running: {images.Length} images to delete");
-
-            foreach (var image in images)
+            try
             {
-                _imageService.ForceDeleteImage(image.ImageCode);
+                var db = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var _imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
+
+                // Images auto-delete task
+                var now = DateTime.UtcNow;
+                var images = db.Images.Where(t => t.DeleteIn <= now);
+                _logger.LogInformation($"Cleanup task running: {images.Length} images to delete");
+
+                foreach (var image in images)
+                {
+                    _imageService.ForceDeleteImage(image.ImageCode);
+                }
+
+
+                // Delete outdated confirmations
+                var confirmations = db.Confirmations.Where(t => t.ValidUntilUTC < now);
+                _logger.LogInformation($"Cleanup task running: {images.Length} confirmations to delete");
+
+                foreach (var confirm in confirmations)
+                {
+                    db.Confirmations.Delete(confirm.Id);
+                }
+
+                db.Save();
             }
-
-
-            // Delete outdated confirmations
-            var confirmations = db.Confirmations.Where(t => t.ValidUntilUTC < now);
-            _logger.LogInformation($"Cleanup task running: {images.Length} confirmations to delete");
-            
-            foreach (var confirm in confirmations)
+            catch (Exception ex)
             {
-                db.Confirmations.Delete(confirm.Id);
+                _logger.LogError(ex, "Exception while running cleanup");
             }
-
-            db.Save();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

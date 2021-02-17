@@ -253,9 +253,17 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = db.Images.Get(id.Value);
-                var filesProfile = files.Profiles.GetOrCreate(image.ProfileId.Value);
-                filesProfile.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
-                filesProfile.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
+                if (image.ProfileId == null)
+                {
+                    files.Anonymous.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
+                    files.Anonymous.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
+                }
+                else
+                {
+                    var filesProfile = files.Profiles.GetOrCreate(image.ProfileId.Value);
+                    filesProfile.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
+                    filesProfile.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
+                }
 
                 db.Images.Delete(id.Value);
                 db.Save();
