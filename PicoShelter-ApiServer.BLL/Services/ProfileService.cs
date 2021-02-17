@@ -100,7 +100,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 IEnumerable<DAL.Entities.AlbumEntity> listAlbums = null;
                 int summaryAlbums = 0;
                 if (adminData)
-                    listAlbums = profile.ProfileAlbums.Select(t => t.Album).Pagination(0, 12, out summaryAlbums);
+                    listAlbums = profile.ProfileAlbums.Select(t => t.Album).Reverse().Pagination(0, 12, out summaryAlbums);
 
                 return new(
                     accDto,
