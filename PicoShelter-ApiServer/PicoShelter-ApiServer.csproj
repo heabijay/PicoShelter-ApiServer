@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>PicoShelter_ApiServer</RootNamespace>
+    <UserSecretsId>293aa60c-7841-4e4d-a327-3cc345f2a129</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

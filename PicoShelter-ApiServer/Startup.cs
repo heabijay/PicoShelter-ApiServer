@@ -73,6 +73,8 @@ namespace PicoShelter_ApiServer
 
             services.AddHostedService<AutoCleanupService>();
 
+            services.AddCors();
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -170,17 +172,13 @@ namespace PicoShelter_ApiServer
             {
                 app.UseDeveloperExceptionPage();
             }
+            //app.UseDeveloperExceptionPage();
+
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin();
-                builder.AllowAnyMethod();
-                builder.AllowAnyHeader();
-            });
 
             app.UseAuthentication();
             app.UseAuthorization();
