@@ -44,8 +44,8 @@ namespace PicoShelter_ApiServer
         {
             var connectionStrings = Configuration.GetSection("ConnectionStrings");
             var defaultConnectionString = connectionStrings.GetValue<string>("DefaultConnection");
-            if (defaultConnectionString.Equals("MYSQLCONNSTR_localdb", StringComparison.OrdinalIgnoreCase))
-                defaultConnectionString = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb");
+            if (defaultConnectionString.StartsWith("EnviromentVariable=", StringComparison.OrdinalIgnoreCase))
+                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnviromentVariable=", ""));
 
             var smtpServers = Configuration.GetSection("SmtpServers");
             var defaultSmtpServer = smtpServers.GetSection("DefaultServer");
