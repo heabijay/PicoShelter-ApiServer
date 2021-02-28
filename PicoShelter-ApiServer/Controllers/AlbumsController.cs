@@ -90,6 +90,29 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
 
+
+        [HttpDelete("a/{albumCode}")]
+        public IActionResult DeleteAlbum(string albumCode)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
+
+            return DeleteAlbum(albumId.Value);
+        }
+
+        private IActionResult DeleteAlbum(int albumId)
+        {
+            int userId = int.Parse(User.Identity.Name);
+            if (_albumService.GetUserRole(albumId, userId) != DAL.Enums.AlbumUserRole.admin)
+                return Forbid();
+
+            _albumService.DeleteAlbum(albumId);
+
+            return Ok();
+        }
+
+
         [AllowAnonymous]
         [HttpHead("a/{albumCode}/images")]
         [HttpGet("a/{albumCode}/images")]
@@ -424,28 +447,6 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 return new ErrorResponse(ex);
             }
-
-            return Ok();
-        }
-
-
-        [HttpDelete("a/{albumCode}/deleteAlbum")]
-        public IActionResult DeleteAlbum(string albumCode)
-        {
-            var albumId = _albumService.GetAlbumIdByCode(albumCode);
-            if (albumId == null)
-                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
-
-            return DeleteAlbum(albumId.Value);
-        }
-
-        private IActionResult DeleteAlbum(int albumId)
-        {
-            int userId = int.Parse(User.Identity.Name);
-            if (_albumService.GetUserRole(albumId, userId) != DAL.Enums.AlbumUserRole.admin)
-                return Forbid();
-
-            _albumService.DeleteAlbum(albumId);
 
             return Ok();
         }
