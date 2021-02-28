@@ -123,6 +123,9 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             foreach (var imageId in imagesId)
             {
+                if (db.AlbumImages.Any(t => t.AlbumId == albumId && t.ImageId == imageId))
+                    continue;
+
                 db.AlbumImages.Add(new AlbumImageEntity()
                 {
                     Album = album,
