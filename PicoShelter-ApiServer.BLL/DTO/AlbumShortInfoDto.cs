@@ -4,6 +4,7 @@
         int id,
         string code,
         string title,
+        bool isPublic,
         ImageShortInfoDto previewImage
     );
 }

@@ -112,6 +112,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                             t.Id,
                             t.Code,
                             t.Title,
+                            t.IsPublic,
                             previewImage == null ? null : new(previewImage.Id, previewImage.ImageCode, previewImage.Extension, previewImage.Title, previewImage.IsPublic)
                         );
                     }).ToList(), summaryAlbums)
@@ -165,6 +166,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                             t.Id,
                             t.Code,
                             t.Title,
+                            t.IsPublic,
                             previewImage == null ? null : new(previewImage.Id, previewImage.ImageCode, previewImage.Extension, previewImage.Title, previewImage.IsPublic)
                         );
                     }).ToList();
