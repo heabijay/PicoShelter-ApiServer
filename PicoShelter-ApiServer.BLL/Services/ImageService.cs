@@ -239,6 +239,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 if (image.ProfileId == requesterId)
                 {
                     ForceDeleteImage(code);
+                    return;
                 }
 
                 throw new UnauthorizedAccessException();
