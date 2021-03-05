@@ -38,7 +38,7 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 if (deleteIn == null)
                     return new ErrorResponse(ExceptionType.UNREGISTERED_DELETEIN_FORBIDDEN);
-                if (form.quality > 95)
+                if (form.quality > 75)
                     return new ErrorResponse(ExceptionType.UNREGISTERED_QUALITY_FORBIDDEN);
                 if (form.isPublic == false)
                     return new ErrorResponse(ExceptionType.UNREGISTERED_ISPUBLICPROP_FORBIDDEN);

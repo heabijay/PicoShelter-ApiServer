@@ -90,12 +90,17 @@ namespace PicoShelter_ApiServer.BLL.Services
                 }
 
                 using (Stream fsImageStream = profileImages.CreateOrUpdate(fsImageEntity))
-                    factory.Save(fsImageStream);
+                {
+                    if (dto.quality != 100)
+                        factory.Save(fsImageStream);
+                    else
+                        dto.inputStream.CopyTo(fsImageStream);
+                }
 
                 factory.Reset();
                 factory.CropToThumbnail(128);
                 factory.BackgroundColor(Color.White);
-                factory.Format(new JpegFormat() { Quality = 95 });
+                factory.Format(new JpegFormat());
                 using (Stream fsThumbnailStream = profileThumbnails.CreateOrUpdate(fsThumbnailEntity))
                     factory.Save(fsThumbnailStream);
 

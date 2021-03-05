@@ -10,6 +10,6 @@ namespace PicoShelter_ApiServer.Requests.Models
         List<int> JoinToAlbums,
         [Range(1, 720, ErrorMessage = "Bad range. Use 1..720 hours or null value for infinity")] int? deleteInHours,
         bool isPublic,
-        [Range(1, 100, ErrorMessage = "Quality must be in range 1..100")] int quality = 95
+        [Range(1, 100, ErrorMessage = "Quality must be in range 1..100")] int quality = 75
     );
 }

@@ -62,7 +62,7 @@ namespace PicoShelter_ApiServer.BLL.Extensions
             },
             {
                 ExceptionType.UNREGISTERED_DELETEIN_FORBIDDEN,
-                "Quality >95% not available for unregistered users."
+                "Quality >75% not available for unregistered users."
             },
             {
                 ExceptionType.UNREGISTERED_ISPUBLICPROP_FORBIDDEN,
