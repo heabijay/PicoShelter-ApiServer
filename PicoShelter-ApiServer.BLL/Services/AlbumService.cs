@@ -69,9 +69,9 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
-            if (dto.userCode != null && !dto.userCode.Equals(album.UserCode, StringComparison.OrdinalIgnoreCase))
+            if (dto?.userCode != null && !dto.userCode.Equals(album.UserCode, StringComparison.OrdinalIgnoreCase))
             {
-                var isExist = db.Albums.Any(t => t.UserCode.Equals(dto.userCode, StringComparison.OrdinalIgnoreCase));
+                var isExist = db.Albums.Any(t => t?.UserCode?.Equals(dto?.userCode, StringComparison.OrdinalIgnoreCase) ?? false);
                 if (isExist)
                     throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
             }
