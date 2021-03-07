@@ -31,7 +31,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public string AddImage(ImageDto dto)
         {
-            using (ImageFactory factory = new ImageFactory())
+            using (ImageFactory factory = new ImageFactory() { AnimationProcessMode = ImageProcessor.Imaging.AnimationProcessMode.First })
             {
                 try
                 {

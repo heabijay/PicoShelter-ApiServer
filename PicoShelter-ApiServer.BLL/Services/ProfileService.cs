@@ -47,7 +47,7 @@ namespace PicoShelter_ApiServer.BLL.Services
         public void SetAvatar(int id, Stream fs)
         {
             var profile = files.Profiles.GetOrCreate(id);
-            using (ImageFactory imageFactory = new ImageFactory())
+            using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.First })
             {
                 try
                 {
