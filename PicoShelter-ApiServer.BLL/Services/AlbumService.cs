@@ -218,6 +218,9 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (profileAlbum == null)
                 throw new HandlingException(ExceptionType.USER_NOT_FOUND, profileId);
 
+            if (profileAlbum.Role == DAL.Enums.AlbumUserRole.admin)
+                throw new HandlingException(ExceptionType.ADMIN_KICK_DISALLOWED);
+
             if (role == DAL.Enums.AlbumUserRole.admin)
             {
                 var adminProfile = album.ProfileAlbums.FirstOrDefault(t => t.Role == DAL.Enums.AlbumUserRole.admin);
