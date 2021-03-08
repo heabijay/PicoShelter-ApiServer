@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
+using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
@@ -10,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer.Controllers
 {
@@ -18,9 +21,19 @@ namespace PicoShelter_ApiServer.Controllers
     public class AlbumsController : ControllerBase
     {
         IAlbumService _albumService;
-        public AlbumsController(IAlbumService albumService)
+        IAccountService _accountService;
+        IConfirmationService _confirmationService;
+        IEmailService _emailService;
+        IConfiguration _configuration;
+        IUnitOfWork db;
+        public AlbumsController(IAlbumService albumService, IAccountService accountService, IConfirmationService confirmationService, IEmailService emailService, IConfiguration configuration, IUnitOfWork uof)
         {
             _albumService = albumService;
+            _accountService = accountService;
+            _confirmationService = confirmationService;
+            _emailService = emailService;
+            _configuration = configuration;
+            db = uof;
         }
 
 
@@ -357,15 +370,89 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
 
-        [HttpPost("a/{albumCode}/addmembers")]
-        public IActionResult AddMembers(string albumCode, List<int> addMembers)
+        [HttpHead("a/{albumCode}/invites")]
+        [HttpGet("a/{albumCode}/invites")]
+        public IActionResult GetInvites([FromRoute] string albumCode, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return NotFound();
+
+            return GetInvites(albumId.Value, starts, count);
+        }
+
+        private IActionResult GetInvites(int id, int? starts, int? count)
+        {
+            int userId = int.Parse(User.Identity.Name);
+
+            var role = _albumService.GetUserRole(id, userId);
+            if (role != DAL.Enums.AlbumUserRole.admin)
+                return Forbid();
+
+            var dto = _confirmationService.GetAlbumInvites(id, starts, count);
+            if (dto != null)
+                return new SuccessResponse(dto);
+
+            return NotFound();
+        }
+
+
+        [HttpPost("a/{albumCode}/invite")]
+        public IActionResult Invite(string albumCode, [FromBody]string username)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
                 return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
 
-            return AddMembers(albumId.Value, addMembers);
+            var id = _accountService.GetAccountId(username.Trim().TrimStart('@'));
+            if (id == null)
+                return new ErrorResponse(ExceptionType.USER_NOT_FOUND);
+
+            try
+            {
+                var acc = _accountService.GetAccountInfo(id.Value);
+                var album = db.Albums.Get(albumId.Value);
+                var email = _accountService.GetEmail(id.Value);
+                TimeSpan validTime = TimeSpan.FromDays(30);
+                var token = _confirmationService.CreateAlbumInvite(albumId.Value, id.Value, (int)validTime.TotalMinutes);
+
+                _emailService.SendAlbumInviteEmailAsync(new()
+                {
+                    targetEmail = email,
+                    username = acc.username,
+                    homeUrl = _configuration.GetSection("WebApp").GetSection("Default").GetValue<string>("HomeUrl"),
+                    joinLink = _configuration.GetSection("WebApp").GetSection("Default").GetValue<string>("ConfirmEndpoint") + token,
+                    albumTitle = album.Title,
+                    albumCode = album.Code,
+                    timeoutDays = (int)validTime.TotalDays
+                });
+            }
+            catch (HandlingException ex)
+            {
+                return new ErrorResponse(ex);
+            }
+
+            return Ok();
         }
+
+        [HttpDelete("a/{albumCode}/invite")]
+        public IActionResult DeleteInvite(string albumCode, [FromBody]int userId)
+        {
+            int reqUserId = int.Parse(User.Identity.Name);
+
+            var albumId = _albumService.GetAlbumIdByCode(albumCode);
+            if (albumId == null)
+                return new ErrorResponse(ExceptionType.ALBUM_NOT_FOUND);
+
+            var role = _albumService.GetUserRole(albumId.Value, reqUserId);
+            if (role != DAL.Enums.AlbumUserRole.admin && reqUserId != userId)
+                return Forbid();
+
+            _confirmationService.DeleteAlbumInvite(albumId.Value, userId);
+
+            return Ok();
+        }
+
 
         private IActionResult AddMembers(int albumId, List<int> addMembers)
         {

@@ -81,5 +81,12 @@ namespace PicoShelter_ApiServer.BLL.Services
             var msg = formatter.Format(dto);
             await SendEmailAsync(dto.targetEmail, "Email changing. Step 2/2", msg);
         }
+
+        public async Task SendAlbumInviteEmailAsync(AlbumInviteDto dto)
+        {
+            EmailFormatter<AlbumInviteDto> formatter = new AlbumInviteFormatter();
+            var msg = formatter.Format(dto);
+            await SendEmailAsync(dto.targetEmail, $"Album invite ({dto.albumTitle} [Code: {dto.albumCode}])", msg);
+        }
     }
 }

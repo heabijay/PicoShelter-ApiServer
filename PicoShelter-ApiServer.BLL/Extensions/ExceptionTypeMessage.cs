@@ -79,6 +79,14 @@ namespace PicoShelter_ApiServer.BLL.Extensions
             {
                 ExceptionType.CONFIRMATIONTYPE_UNSUPPORTED,
                 "Selected confirmation type is unsupported for this method"
+            },
+            {
+                ExceptionType.USER_ALREADY_INVITED,
+                "Selected user already invited!"
+            },
+            {
+                ExceptionType.USER_ALREADY_JOINED,
+                "Selected user already joined!"
             }
         };
 

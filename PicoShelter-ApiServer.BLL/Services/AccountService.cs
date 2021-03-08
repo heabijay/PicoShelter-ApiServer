@@ -1,5 +1,6 @@
 ﻿using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Entities;
@@ -190,12 +191,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var acc = database.Accounts.Get(id);
             if (acc != null)
             {
-                ProfileNameDto nameDto = null;
-                var profile = acc.Profile;
-                if (profile != null)
-                    nameDto = new(profile.Firstname, profile.Lastname);
-
-                return new AccountInfoDto(acc.Id, acc.Username, nameDto, acc.Role.Name);
+                return acc.MapToAccountInfo();
             }
 
             return null;

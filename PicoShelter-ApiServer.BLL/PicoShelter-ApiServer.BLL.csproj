@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\EmailTemplates\albumInvite.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\EmailTemplates\albumInvite.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\EmailTemplates\emailChanging.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

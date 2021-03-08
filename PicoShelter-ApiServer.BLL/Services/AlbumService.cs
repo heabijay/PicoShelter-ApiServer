@@ -87,7 +87,13 @@ namespace PicoShelter_ApiServer.BLL.Services
         public void DeleteAlbum(int id)
         {
             db.Albums.Delete(id);
+            var invites = db.Confirmations.Where(t => t.Data == id.ToString());
+            foreach (var invite in invites)
+            {
+                db.Confirmations.Delete(invite.Id);
+            }
             db.Save();
+
         }
 
         public int? GetAlbumIdByCode(string code)
@@ -287,35 +293,14 @@ namespace PicoShelter_ApiServer.BLL.Services
                             .Select(t => t.Image)
                             .Reverse()
                             .Pagination(null, 12, out int summaryAlbumImages)
-                            .Select(t => new ImageShortInfoDto(
-                                t.Id,
-                                t.ImageCode,
-                                t.Extension,
-                                t.Title,
-                                t.IsPublic
-                            ))
+                            .Select(t => t.MapToShortInfo())
                             .ToList(),
                             summaryAlbumImages
                         ),
                         new(album.ProfileAlbums
                             .Reverse<ProfileAlbumEntity>()
                             .Pagination(null, 12, out int summaryProfileAlbums)
-                            .Select(t =>
-                            {
-                                var profile = db.Profiles.Get(t.ProfileId);
-                                return new AlbumProfileInfoDto(
-                                new(
-                                    profile.AccountId,
-                                    profile.Account?.Username,
-                                    new(
-                                        profile.Firstname,
-                                        profile.Lastname
-                                    ),
-                                    profile.Account?.Role?.Name
-                                ),
-                                t.Role
-                                );
-                            })
+                            .Select(t => t.MapToAlbumProfileInfo())
                             .ToList(),
                             summaryProfileAlbums
                         )
@@ -338,7 +323,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     listImages = listImages.Reverse().Pagination(starts, count, out int summaryCount);
 
-                    var dtos = listImages.Select(t => new ImageShortInfoDto(t.Id, t.ImageCode, t.Extension, t.Title, t.IsPublic)).ToList();
+                    var dtos = listImages.Select(t => t.MapToShortInfo()).ToList();
                     return new PaginationResultDto<ImageShortInfoDto>(dtos, summaryCount);
                 }
             }
@@ -359,18 +344,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                     listAlbums = listAlbums.Reverse().Pagination(starts, count, out int summaryCount);
 
                     var dtos = listAlbums
-                        .Select(t => new AlbumProfileInfoDto(
-                            new(
-                                t.Profile.Account.Id,
-                                t.Profile.Account.Username,
-                                new(
-                                    t.Profile.Firstname,
-                                    t.Profile.Lastname
-                                ),
-                                t.Profile.Account.Role.Name
-                            ),
-                            t.Role
-                        ))
+                        .Select(t => t.MapToAlbumProfileInfo())
                         .ToList();
 
                     return new PaginationResultDto<AlbumProfileInfoDto>(dtos, summaryCount);

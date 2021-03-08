@@ -87,6 +87,15 @@ namespace PicoShelter_ApiServer.Controllers
 
         }
 
+        [HttpHead("getAlbumInvites")]
+        [HttpGet("getAlbumInvites")]
+        [Authorize]
+        public IActionResult GetAlbumInvites([FromQuery] int? starts, [FromQuery] int? count)
+        {
+            int id = int.Parse(User.Identity.Name);
+            return new SuccessResponse(_confirmationService.GetUserAlbumInvites(id, starts, count));
+        }
+
         [HttpPut("changepassword")]
         [Authorize]
         public IActionResult ChangePassword([FromBody]AccountChangePasswordModel m)

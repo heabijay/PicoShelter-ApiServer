@@ -5,6 +5,7 @@
         EmailRegistration,
         EmailChanging,
         EmailChangingNew,
-        PasswordRestore
+        PasswordRestore,
+        AlbumInvite
     }
 }

@@ -9,5 +9,6 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public Task SendPasswordRestoreEmailAsync(PasswordResetDto dto);
         public Task SendEmailChangingEmailAsync(EmailChangingDto dto);
         public Task SendEmailChangingNewEmailAsync(EmailChangingNewDto dto);
+        public Task SendAlbumInviteEmailAsync(AlbumInviteDto dto);
     }
 }

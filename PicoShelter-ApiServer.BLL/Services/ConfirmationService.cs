@@ -1,10 +1,12 @@
 ﻿using PicoShelter_ApiServer.BLL.DTO;
+using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Enums;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using System;
+using System.Linq;
 using System.Text.Json;
 
 namespace PicoShelter_ApiServer.BLL.Services
@@ -13,10 +15,12 @@ namespace PicoShelter_ApiServer.BLL.Services
     {
         IUnitOfWork db;
         IAccountService _accountService;
-        public ConfirmationService(IUnitOfWork unit, IAccountService accountService)
+        IAlbumService _albumService;
+        public ConfirmationService(IUnitOfWork unit, IAccountService accountService, IAlbumService albumService)
         {
             db = unit;
             _accountService = accountService;
+            _albumService = albumService;
         }
 
         private ConfirmationEntity GetConfirmationEntity(string token) => db.Confirmations.FirstOrDefault(t => t.Token.Equals(token, System.StringComparison.Ordinal) && t.ValidUntilUTC >= DateTime.UtcNow);
@@ -99,6 +103,12 @@ namespace PicoShelter_ApiServer.BLL.Services
             db.Save();
         }
 
+        public void Delete(int confirmId)
+        {
+            db.Confirmations.Delete(confirmId);
+            db.Save();
+        }
+
         public string CreateEmailRegistration(AccountEntity accountEntity, int timeout = 20)
         {
             return Create(
@@ -118,8 +128,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             _accountService.Register(entity);
 
-            db.Confirmations.Delete(dto.Id);
-            db.Save();
+            Delete(dto.Id);
         }
 
 
@@ -156,8 +165,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var accId = dto.AccountId.Value;
             var data = dto.Data;
 
-            db.Confirmations.Delete(dto.Id);
-            db.Save();
+            Delete(dto.Id);
 
             return CreateEmailChangingNew(accId, JsonSerializer.Deserialize<AccountChangeEmailDto>(data), timeout);
         }
@@ -175,15 +183,20 @@ namespace PicoShelter_ApiServer.BLL.Services
             var data = JsonSerializer.Deserialize<AccountChangeEmailDto>(dto.Data);
             var currentEmail = _accountService.GetEmail(dto.AccountId.Value);
             if (!data.currentEmail.Equals(currentEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                Delete(dto.Id);
                 throw new HandlingException(ExceptionType.CURRENT_EMAIL_WAS_ALREADY_CHANGED);
+            }
 
             if (_accountService.IsEmailAlreadyRegistered(data.newEmail))
+            {
+                Delete(dto.Id);
                 throw new HandlingException(ExceptionType.EMAIL_ALREADY_REGISTERED);
+            }
 
             _accountService.ChangeEmail(dto.AccountId.Value, data.newEmail);
 
-            db.Confirmations.Delete(dto.Id);
-            db.Save();
+            Delete(dto.Id);
         }
 
 
@@ -206,8 +219,103 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             _accountService.ForceSetPassword(accId, newPassword);
 
-            db.Confirmations.Delete(dto.Id);
+            Delete(dto.Id);
+        }
+
+        public string CreateAlbumInvite(int albumId, int accountId, int timeout = 43200)
+        {
+            var album = db.Albums.Get(albumId);
+            if (album == null)
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
+
+            var isJoined = db.ProfileAlbums.Any(t => t.ProfileId == accountId && t.AlbumId == albumId);
+            if (isJoined)
+                throw new HandlingException(ExceptionType.USER_ALREADY_JOINED);
+
+            var isAlreadyInvited = db.Confirmations.Any(t => t.ValidUntilUTC >= DateTime.UtcNow && t.AccountId == accountId && t.Data == albumId.ToString());
+            if (isAlreadyInvited)
+                throw new HandlingException(ExceptionType.USER_ALREADY_INVITED);
+
+            return Create(
+                ConfirmationType.AlbumInvite,
+                albumId.ToString(),
+                timeout,
+                accountId
+            );
+        }
+
+        public void DeleteAlbumInvite(int albumId, int accountId)
+        {
+            var invite = db.Confirmations.FirstOrDefault(t => t.ValidUntilUTC >= DateTime.UtcNow && t.AccountId == accountId && t.Data == albumId.ToString());
+            if (invite != null)
+            {
+                Delete(invite.Id);
+            }
+        }
+
+        public void DeleteAllAlbumInvites(int albumId)
+        {
+            var conf = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString());
+            foreach (var c in conf)
+                db.Confirmations.Delete(c.Id);
+
             db.Save();
+        }
+
+        public PaginationResultDto<AlbumShortInfoDto> GetUserAlbumInvites(int userId, int? starts, int? count)
+        {
+            var confs = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.AccountId == userId /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
+
+            var r = confs.Select(t =>
+            {
+                int albumId = int.Parse(t.Data);
+                var album = db.Albums.Get(albumId);
+                return album.MapToShortInfo();
+            });
+
+            r = r.Pagination(starts, count, out int summary);
+            return new PaginationResultDto<AlbumShortInfoDto>(r.ToList(), summary);
+        }
+
+        public PaginationResultDto<AccountInfoDto> GetAlbumInvites(int albumId, int? starts, int? count)
+        {
+            var confs = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString() /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
+
+            var r = confs.Select(t => t.Account.MapToAccountInfo());
+
+            r = r.Pagination(starts, count, out int summary);
+            return new PaginationResultDto<AccountInfoDto>(r.ToList(), summary);
+        }
+
+        public void ConfirmAlbumInvite(int? requesterId, string key)
+        {
+            var dto = GetConfirmationEntity(key);
+
+            if (dto.AccountId != requesterId)
+                throw new UnauthorizedAccessException();
+
+            if (dto.Type != ConfirmationType.AlbumInvite)
+                throw new InvalidCastException();
+
+            var albumId = int.Parse(dto.Data);
+
+            var album = db.Albums.Get(albumId);
+            if (album == null)
+            {
+                Delete(dto.Id);
+                throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
+            }
+
+            var isJoined = db.ProfileAlbums.Any(t => t.ProfileId == dto.AccountId && t.AlbumId == albumId);
+            if (isJoined)
+            {
+                Delete(dto.Id);
+                throw new HandlingException(ExceptionType.USER_ALREADY_JOINED);
+            }
+
+            _albumService.AddMembers(albumId, dto.AccountId.Value);
+
+            Delete(dto.Id);
         }
     }
 }

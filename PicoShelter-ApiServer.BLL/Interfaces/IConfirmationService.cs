@@ -18,5 +18,11 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public void ConfirmEmailChangingNew(int? requesterId, string key);
         public string CreatePasswordReset(int accountToResetId, int timeout = 20);
         public void ConfirmPasswordReset(string key, string newPassword);
+        public string CreateAlbumInvite(int albumId, int accountId, int timeout = 43200);
+        public void DeleteAlbumInvite(int albumId, int accountId);
+        public void DeleteAllAlbumInvites(int albumId);
+        public PaginationResultDto<AlbumShortInfoDto> GetUserAlbumInvites(int userId, int? starts, int? count);
+        public PaginationResultDto<AccountInfoDto> GetAlbumInvites(int albumId, int? starts, int? count);
+        public void ConfirmAlbumInvite(int? requesterId, string key);
     }
 }
