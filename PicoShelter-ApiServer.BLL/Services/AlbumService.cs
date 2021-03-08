@@ -298,7 +298,6 @@ namespace PicoShelter_ApiServer.BLL.Services
                             summaryAlbumImages
                         ),
                         new(album.ProfileAlbums
-                            .Reverse<ProfileAlbumEntity>()
                             .Pagination(null, 12, out int summaryProfileAlbums)
                             .Select(t => t.MapToAlbumProfileInfo())
                             .ToList(),
@@ -339,11 +338,11 @@ namespace PicoShelter_ApiServer.BLL.Services
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
                 if (validator.Validate())
                 {
-                    IEnumerable<ProfileAlbumEntity> listAlbums = album.ProfileAlbums;
+                    IEnumerable<ProfileAlbumEntity> listProfiles = album.ProfileAlbums;
 
-                    listAlbums = listAlbums.Reverse().Pagination(starts, count, out int summaryCount);
+                    listProfiles = listProfiles.Pagination(starts, count, out int summaryCount);
 
-                    var dtos = listAlbums
+                    var dtos = listProfiles
                         .Select(t => t.MapToAlbumProfileInfo())
                         .ToList();
 
