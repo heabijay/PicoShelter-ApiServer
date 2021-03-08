@@ -192,7 +192,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             foreach (var profileId in profilesId)
             {
-                var profileAlbum = album.ProfileAlbums.FirstOrDefault(t => t.ProfileId == profileId);
+                var profileAlbum = db.ProfileAlbums.FirstOrDefault(t => t.AlbumId == albumId && t.ProfileId == profileId);
                 if (profileAlbum == null)
                     throw new HandlingException(ExceptionType.USER_NOT_FOUND, profileId);
 
@@ -202,7 +202,8 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             foreach (var profileId in profilesId)
             {
-                db.ProfileAlbums.Delete(profileId);
+                var profileAlbum = db.ProfileAlbums.FirstOrDefault(t => t.AlbumId == albumId && t.ProfileId == profileId);
+                db.ProfileAlbums.Delete(profileAlbum.Id);
             }
 
             db.Save();
