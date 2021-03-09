@@ -273,7 +273,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 return album.MapToShortInfo();
             });
 
-            r = r.Pagination(starts, count, out int summary);
+            r = r.Reverse().Pagination(starts, count, out int summary);
             return new PaginationResultDto<AlbumShortInfoDto>(r.ToList(), summary);
         }
 
