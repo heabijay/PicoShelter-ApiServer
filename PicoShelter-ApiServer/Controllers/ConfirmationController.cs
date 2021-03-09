@@ -71,6 +71,9 @@ namespace PicoShelter_ApiServer.Controllers
                         break;
                     case DAL.Enums.ConfirmationType.PasswordRestore:
                         return new ErrorResponse(BLL.Infrastructure.ExceptionType.CONFIRMATIONTYPE_UNSUPPORTED);
+                    case DAL.Enums.ConfirmationType.AlbumInvite:
+                        _confirmationService.ConfirmAlbumInvite(id, key);
+                        break;
                     default:
                         throw new NotImplementedException();
                 }
