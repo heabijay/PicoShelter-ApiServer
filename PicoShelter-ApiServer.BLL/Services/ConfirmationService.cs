@@ -262,7 +262,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             db.Save();
         }
 
-        public PaginationResultDto<AlbumShortInfoDto> GetUserAlbumInvites(int userId, int? starts, int? count)
+        public PaginationResultDto<UserAlbumInviteDto> GetUserAlbumInvites(int userId, int? starts, int? count)
         {
             var confs = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.AccountId == userId /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
 
@@ -270,11 +270,11 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 int albumId = int.Parse(t.Data);
                 var album = db.Albums.Get(albumId);
-                return album.MapToShortInfo();
+                return new UserAlbumInviteDto(t.Token, album.MapToShortInfo());
             });
 
             r = r.Reverse().Pagination(starts, count, out int summary);
-            return new PaginationResultDto<AlbumShortInfoDto>(r.ToList(), summary);
+            return new PaginationResultDto<UserAlbumInviteDto>(r.ToList(), summary);
         }
 
         public PaginationResultDto<AccountInfoDto> GetAlbumInvites(int albumId, int? starts, int? count)

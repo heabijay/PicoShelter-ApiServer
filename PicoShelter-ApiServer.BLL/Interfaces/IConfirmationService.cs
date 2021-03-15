@@ -21,7 +21,7 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public string CreateAlbumInvite(int albumId, int accountId, int timeout = 43200);
         public void DeleteAlbumInvite(int albumId, int accountId);
         public void DeleteAllAlbumInvites(int albumId);
-        public PaginationResultDto<AlbumShortInfoDto> GetUserAlbumInvites(int userId, int? starts, int? count);
+        public PaginationResultDto<UserAlbumInviteDto> GetUserAlbumInvites(int userId, int? starts, int? count);
         public PaginationResultDto<AccountInfoDto> GetAlbumInvites(int albumId, int? starts, int? count);
         public void ConfirmAlbumInvite(int? requesterId, string key);
     }
