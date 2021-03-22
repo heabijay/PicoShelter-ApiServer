@@ -73,6 +73,9 @@ namespace PicoShelter_ApiServer.Controllers
         {
             string username = _accountService.GetUsernameByEmail(m.Email);
 
+            if (username == null)
+                return new ErrorResponse(ExceptionType.CREDENTIALS_INCORRECT);
+
             return GetToken(username, m.Password);
         }
 
