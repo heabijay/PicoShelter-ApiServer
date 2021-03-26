@@ -303,7 +303,11 @@ namespace PicoShelter_ApiServer.BLL.Services
                         ),
                         new(album.ProfileAlbums
                             .Pagination(null, 12, out int summaryProfileAlbums)
-                            .Select(t => t.MapToAlbumProfileInfo())
+                            .Select(t =>
+                            {
+                                var profile = db.Profiles.Get(t.ProfileId);
+                                return new AlbumProfileInfoDto(profile.MapToAccountInfo(), t.Role);
+                            })
                             .ToList(),
                             summaryProfileAlbums
                         )
@@ -347,7 +351,11 @@ namespace PicoShelter_ApiServer.BLL.Services
                     listProfiles = listProfiles.Pagination(starts, count, out int summaryCount);
 
                     var dtos = listProfiles
-                        .Select(t => t.MapToAlbumProfileInfo())
+                        .Select(t =>
+                        {
+                            var profile = db.Profiles.Get(t.ProfileId);
+                            return new AlbumProfileInfoDto(profile.MapToAccountInfo(), t.Role);
+                        })
                         .ToList();
 
                     return new PaginationResultDto<AlbumProfileInfoDto>(dtos, summaryCount);

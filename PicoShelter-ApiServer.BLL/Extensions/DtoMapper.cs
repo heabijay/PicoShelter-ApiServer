@@ -40,13 +40,5 @@ namespace PicoShelter_ApiServer.BLL.Extensions
         {
             return t.Account.MapToAccountInfo();
         }
-
-        public static AlbumProfileInfoDto MapToAlbumProfileInfo(this ProfileAlbumEntity t)
-        {
-            return new AlbumProfileInfoDto(
-                t.Profile.MapToAccountInfo(),
-                t.Role
-            );
-        }
     }
 }
