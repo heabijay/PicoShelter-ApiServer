@@ -26,6 +26,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer
@@ -45,7 +46,15 @@ namespace PicoShelter_ApiServer
             var connectionStrings = Configuration.GetSection("ConnectionStrings");
             var defaultConnectionString = connectionStrings.GetValue<string>("DefaultConnection");
             if (defaultConnectionString.StartsWith("EnviromentVariable=", StringComparison.OrdinalIgnoreCase))
-                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnviromentVariable=", ""));
+            {
+                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnviromentVariable=", "", StringComparison.OrdinalIgnoreCase));
+            }
+            else if (defaultConnectionString.StartsWith("EnviromentVariableMySQL=", StringComparison.OrdinalIgnoreCase))
+            {
+                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnviromentVariableMySQL=", "", StringComparison.OrdinalIgnoreCase));
+                if (defaultConnectionString != null)
+                    defaultConnectionString = MySQLToNetConnectionString(defaultConnectionString);
+            }
 
             var smtpServers = Configuration.GetSection("SmtpServers");
             var defaultSmtpServer = smtpServers.GetSection("DefaultServer");
@@ -196,6 +205,37 @@ namespace PicoShelter_ApiServer
                 options.RoutePrefix = "apidocs";
                 options.SwaggerEndpoint($"/swagger/v1/swagger.json", "PicoShelter API");
             });
+        }
+
+
+        private static string MySQLToNetConnectionString(string connectionString)
+        {
+            var matches = Regex.Matches(
+                    connectionString,
+                    "((^|;)User Id=(?<Uid>[^;]+))|((^|;)Password=(?<Pwd>[^;]+))|((^|;)Database=(?<Database>[^;]+))|((^|;)Data Source=((?<Server>[^:;]+):?(?<Port>[^;]*)))",
+                    RegexOptions.IgnoreCase
+                    ).Cast<Match>();
+
+            connectionString = "";
+            foreach (var m in matches)
+            {
+                if (m.Groups["Server"].Success)
+                    connectionString += "Server=" + m.Groups["Server"].Value + ';';
+
+                if (m.Groups["Port"].Success)
+                    connectionString += "Port=" + m.Groups["Port"].Value + ';';
+
+                if (m.Groups["Database"].Success)
+                    connectionString += "Database=" + m.Groups["Database"].Value + ';';
+
+                if (m.Groups["Uid"].Success)
+                    connectionString += "Uid=" + m.Groups["Uid"].Value + ';';
+
+                if (m.Groups["Pwd"].Success)
+                    connectionString += "Pwd=" + m.Groups["Pwd"].Value + ';';
+            }
+
+            return connectionString;
         }
     }
 }

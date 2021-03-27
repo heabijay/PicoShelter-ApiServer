@@ -14,7 +14,9 @@ namespace PicoShelter_ApiServer.DAL.EF
         public DbSet<AlbumImageEntity> AlbumImages { get; set; }
         public DbSet<ConfirmationEntity> Confirmations { get; set; }
 
+
         private string _connectionString;
+
         public ApplicationContext(string connectionString) : base()
         {
             _connectionString = connectionString;
@@ -25,7 +27,12 @@ namespace PicoShelter_ApiServer.DAL.EF
         {
             builder.UseLazyLoadingProxies();
 
-            builder.UseSqlServer(_connectionString);
+            var isMySQL = _connectionString.Contains(";Uid=", System.StringComparison.OrdinalIgnoreCase) || _connectionString.StartsWith("Uid=", System.StringComparison.OrdinalIgnoreCase);
+
+            if (isMySQL)
+                builder.UseMySql(_connectionString, ServerVersion.AutoDetect(_connectionString));
+            else
+                builder.UseSqlServer(_connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
