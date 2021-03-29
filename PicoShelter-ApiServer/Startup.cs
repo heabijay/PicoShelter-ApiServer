@@ -196,10 +196,12 @@ namespace PicoShelter_ApiServer
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.Map("/", async context =>
+                endpoints.Map("/", context =>
                 {
                     var url = app.ApplicationServices.GetService<IConfiguration>().GetSection("WebApp").GetSection("Default").GetValue<string>("HomeUrl");
                     context.Response.Redirect(url, true);
+
+                    return Task.CompletedTask;
                 });
                 endpoints.MapDefaultControllerRoute();
             });
