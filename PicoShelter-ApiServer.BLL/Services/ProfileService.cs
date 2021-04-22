@@ -57,9 +57,10 @@ namespace PicoShelter_ApiServer.BLL.Services
                 {
                     throw new HandlingException(ExceptionType.INPUT_IMAGE_INVALID);
                 }
+                imageFactory.AutoRotate();
                 imageFactory.CropToThumbnail(256);
                 imageFactory.BackgroundColor(Color.White);
-                imageFactory.Format(new JpegFormat { Quality = 95 });
+                imageFactory.Format(new JpegFormat { Quality = 75 });
                 using (Stream file = files.Avatars.CreateOrUpdate(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" }))
                 {
                     imageFactory.Save(file);

@@ -42,6 +42,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                     throw new HandlingException(ExceptionType.INPUT_IMAGE_INVALID);
                 }
 
+                factory.AutoRotate();
                 if (dto.quality != 100)
                 {
                     factory.BackgroundColor(Color.White);
@@ -98,6 +99,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 }
 
                 factory.Reset();
+                factory.AutoRotate();
                 factory.CropToThumbnail(128);
                 factory.BackgroundColor(Color.White);
                 factory.Format(new JpegFormat());
