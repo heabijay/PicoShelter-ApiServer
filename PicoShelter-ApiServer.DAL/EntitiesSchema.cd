@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.AccountEntity">
+    <Position X="0.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAACAAAAAAEQAAAQAAAAAAAAACABAAAAQAAAA=</HashCode>
+      <FileName>Entities\AccountEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.AlbumEntity">
+    <Position X="13.25" Y="0.5" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAQAAgAAAACAAEAAAAAgAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\AlbumEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.AlbumImageEntity">
+    <Position X="7.5" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAgAAAABEAAAAACAAAAAA=</HashCode>
+      <FileName>Entities\AlbumImageEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.ConfirmationEntity">
+    <Position X="3.5" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAABABAAAQAAAAABAEA=</HashCode>
+      <FileName>Entities\ConfirmationEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.ImageEntity">
+    <Position X="6.5" Y="2.75" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAgCAAEAAAAAAAAAAACAAAQAAABAAAAAAgAA=</HashCode>
+      <FileName>Entities\ImageEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.ProfileAlbumEntity">
+    <Position X="9.5" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAEAAAAAAAgAAAAAAAABAACAAAgAA=</HashCode>
+      <FileName>Entities\ProfileAlbumEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.ProfileEntity">
+    <Position X="3.5" Y="2.75" Width="2.75" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAACAkAAAAAAAAAIAgAAAAAAAAAAABAAAAAAAAAAAEA=</HashCode>
+      <FileName>Entities\ProfileEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Entities.RoleEntity">
+    <Position X="0.5" Y="3" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Entities\RoleEntity.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PicoShelter_ApiServer.DAL.Abstract.Entity">
+    <Position X="0.5" Y="5.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Abstract\Entity.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Enum Name="PicoShelter_ApiServer.DAL.Enums.ConfirmationType">
+    <Position X="5.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAAAAAAAAAAAAAAIAAQAAQAAAAQAAAA=</HashCode>
+      <FileName>Enums\ConfirmationType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="PicoShelter_ApiServer.DAL.Enums.AlbumUserRole">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAACAAAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Enums\AlbumUserRole.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="8.25" />
+</ClassDiagram>
