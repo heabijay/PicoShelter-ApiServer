@@ -46,7 +46,7 @@ namespace PicoShelter_ApiServer.Services
 
                 // Delete outdated confirmations
                 var confirmations = db.Confirmations.Where(t => t.ValidUntilUTC < now);
-                _logger.LogInformation($"Cleanup task running: {images.Length} confirmations to delete");
+                _logger.LogInformation($"Cleanup task running: {confirmations.Length} confirmations to delete");
 
                 foreach (var confirm in confirmations)
                 {
