@@ -23,7 +23,7 @@ namespace PicoShelter_ApiServer.Responses.Models.Stats
 
         public DriveInfoModel(DriveInfo drive, bool isRepository = false) : this()
         {
-            freeSpace = drive.TotalFreeSpace;
+            freeSpace = drive.AvailableFreeSpace;
             totalSpace = drive.TotalFreeSpace;
             driveName = drive.Name;
             driveType = drive.DriveType.ToString();
