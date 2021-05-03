@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
 using PicoShelter_ApiServer.Responses.Models.Stats;
+using PicoShelter_ApiServer.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,10 +25,12 @@ namespace PicoShelter_ApiServer.Controllers
     {
         IUnitOfWork db;
         IImageService _imageService;
-        public AdminController(IUnitOfWork unit, IImageService imageService)
+        IServiceProvider _serviceProvider;
+        public AdminController(IUnitOfWork unit, IImageService imageService, IServiceProvider serviceProvider)
         {
             db = unit;
             _imageService = imageService;
+            _serviceProvider = serviceProvider;
         }
 
         [HttpHead("stats")]
@@ -119,6 +123,21 @@ namespace PicoShelter_ApiServer.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Forbid();
+            }
+        }
+
+        [HttpHead("forceCleanup")]
+        [HttpGet("forceCleanup")]
+        public IActionResult ForceCleanup()
+        {
+            try
+            {
+                new AutoCleanupService((ILogger<AutoCleanupService>)_serviceProvider.GetService(typeof(ILogger<AutoCleanupService>)), _serviceProvider).DoWork(null);
+                return Ok();
+            }
+            catch
+            {
+                return StatusCode(500);
             }
         }
     }

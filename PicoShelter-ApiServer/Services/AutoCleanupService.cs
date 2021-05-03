@@ -26,7 +26,7 @@ namespace PicoShelter_ApiServer.Services
             timer?.Dispose();
         }
 
-        private void DoWork(object obj)
+        public void DoWork(object obj)
         {
             try
             {
