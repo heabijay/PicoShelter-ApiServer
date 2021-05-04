@@ -82,8 +82,6 @@ namespace PicoShelter_ApiServer.Controllers
         [HttpGet("getImage/{code}.{extension}")]
         public IActionResult GetImage(string code, string extension)
         {
-            var idStr = User?.Identity?.Name;
-            int? id = idStr == null ? null : int.Parse(idStr);
             try
             {
                 var stream = _imageService.GetImage(code, extension, new AccessWithPublicEndpointImageValidator(), out string type);
@@ -130,9 +128,13 @@ namespace PicoShelter_ApiServer.Controllers
         [HttpGet("forceCleanup")]
         public IActionResult ForceCleanup()
         {
+            var idStr = User?.Identity?.Name;
+            int? id = idStr == null ? null : int.Parse(idStr);
             try
             {
-                new AutoCleanupService((ILogger<AutoCleanupService>)_serviceProvider.GetService(typeof(ILogger<AutoCleanupService>)), _serviceProvider).DoWork(null);
+                var logger = (ILogger<AutoCleanupService>)_serviceProvider.GetService(typeof(ILogger<AutoCleanupService>));
+                logger.LogInformation($"Admin (ID:{id}) has been requested the force cleanup.");
+                new AutoCleanupService(logger, _serviceProvider).DoWork(null);
                 return Ok();
             }
             catch
