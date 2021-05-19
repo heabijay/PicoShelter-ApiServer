@@ -264,26 +264,29 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public PaginationResultDto<UserAlbumInviteDto> GetUserAlbumInvites(int userId, int? starts, int? count)
         {
-            var confs = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.AccountId == userId /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
+            var confs = db.Confirmations
+                .GetAll()
+                .Where(t => t.Type == ConfirmationType.AlbumInvite && t.AccountId == userId /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
 
-            var r = confs.Select(t =>
+            var r = confs.OrderBy(t => t).Reverse().Pagination(starts, count, out int summary);
+
+            var result = r.ToList().Select(t =>
             {
-                int albumId = int.Parse(t.Data);
+                int albumId = Convert.ToInt32(t.Data);
                 var album = db.Albums.Get(albumId);
                 return new UserAlbumInviteDto(t.Token, album.MapToShortInfo());
             });
 
-            r = r.Reverse().Pagination(starts, count, out int summary);
-            return new PaginationResultDto<UserAlbumInviteDto>(r.ToList(), summary);
+            return new PaginationResultDto<UserAlbumInviteDto>(result.ToList(), summary);
         }
 
         public PaginationResultDto<AccountInfoDto> GetAlbumInvites(int albumId, int? starts, int? count)
         {
             var confs = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString() /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
 
-            confs = confs.Pagination(starts, count, out int summary).ToList();
+            var confsR = confs.Pagination(starts, count, out int summary).ToList();
 
-            var r = confs.Select(t => t.Account.MapToAccountInfo());
+            var r = confsR.Select(t => t.Account.MapToAccountInfo());
 
             return new PaginationResultDto<AccountInfoDto>(r.ToList(), summary);
         }

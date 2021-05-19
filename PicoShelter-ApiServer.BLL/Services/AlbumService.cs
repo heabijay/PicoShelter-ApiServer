@@ -294,15 +294,18 @@ namespace PicoShelter_ApiServer.BLL.Services
                         album.CreatedDateUTC,
                         role,
                         new(album.AlbumImages
+                            .AsQueryable()
                             .Select(t => t.Image)
                             .Reverse()
                             .Pagination(null, 12, out int summaryAlbumImages)
+                            .ToList()
                             .Select(t => t.MapToShortInfo())
                             .ToList(),
                             summaryAlbumImages
                         ),
-                        new(album.ProfileAlbums
+                        new(album.ProfileAlbums.AsQueryable()
                             .Pagination(null, 12, out int summaryProfileAlbums)
+                            .ToList()
                             .Select(t =>
                             {
                                 var profile = db.Profiles.Get(t.ProfileId);
@@ -326,7 +329,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
                 if (validator.Validate())
                 {
-                    var listImages = album.AlbumImages.Select(t => t.Image);
+                    var listImages = album.AlbumImages.AsQueryable().Select(t => t.Image);
 
                     listImages = listImages.Reverse().Pagination(starts, count, out int summaryCount);
 
@@ -346,11 +349,12 @@ namespace PicoShelter_ApiServer.BLL.Services
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
                 if (validator.Validate())
                 {
-                    IEnumerable<ProfileAlbumEntity> listProfiles = album.ProfileAlbums;
+                    IQueryable<ProfileAlbumEntity> listProfiles = album.ProfileAlbums.AsQueryable();
 
                     listProfiles = listProfiles.Pagination(starts, count, out int summaryCount);
 
                     var dtos = listProfiles
+                        .AsEnumerable()
                         .Select(t =>
                         {
                             var profile = db.Profiles.Get(t.ProfileId);

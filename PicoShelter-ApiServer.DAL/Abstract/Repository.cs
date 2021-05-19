@@ -3,6 +3,7 @@ using PicoShelter_ApiServer.DAL.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace PicoShelter_ApiServer.DAL.Abstract
 {
@@ -47,9 +48,9 @@ namespace PicoShelter_ApiServer.DAL.Abstract
             return db.Set<T>().Find(id);
         }
 
-        public virtual IEnumerable<T> GetAll()
+        public virtual IQueryable<T> GetAll()
         {
-            return db.Set<T>().AsEnumerable();
+            return db.Set<T>().AsQueryable();
         }
 
         public virtual void Update(T item)
@@ -60,9 +61,9 @@ namespace PicoShelter_ApiServer.DAL.Abstract
             }
         }
 
-        public virtual IEnumerable<T> Where(Func<T, bool> predicate)
+        public virtual IQueryable<T> Where(Expression<Func<T, bool>> predicate)
         {
-            return db.Set<T>().Where(predicate);
+            return GetAll().Where(predicate);
         }
     }
 }

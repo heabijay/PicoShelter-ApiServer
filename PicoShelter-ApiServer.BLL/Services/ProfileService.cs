@@ -88,20 +88,18 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (profile != null)
             {
                 var accDto = _accountService.GetAccountInfo(id);
-                var images = profile.Images;
+                var images = profile.Images.AsQueryable();
 
-                IEnumerable<DAL.Entities.ImageEntity> listImages = null;
-                if (adminData)
-                    listImages = images;
-                else
+                IQueryable<DAL.Entities.ImageEntity> listImages = images;
+                if (!adminData)
                     listImages = images.Where(t => t.IsPublic);
 
                 listImages = listImages.Reverse().Pagination(0, 12, out int summaryImages);
 
-                IEnumerable<DAL.Entities.AlbumEntity> listAlbums = null;
+                IQueryable<DAL.Entities.AlbumEntity> listAlbums = null;
                 int summaryAlbums = 0;
                 if (adminData)
-                    listAlbums = profile.ProfileAlbums.Select(t => t.Album).Reverse().Pagination(0, 12, out summaryAlbums);
+                    listAlbums = profile.ProfileAlbums.AsQueryable().Reverse().Select(t => t.Album).Pagination(0, 12, out summaryAlbums);
 
                 var imagesResult = listImages?.ToList();
                 var albumsResult = listAlbums?.ToList();
@@ -121,16 +119,13 @@ namespace PicoShelter_ApiServer.BLL.Services
             var profile = db.Profiles.Get(id);
             if (profile != null)
             {
-                var images = profile.Images;
+                var images = profile.Images.AsQueryable();
 
-                IEnumerable<DAL.Entities.ImageEntity> listImages = null;
-                if (adminData)
-                    listImages = images;
-                else
+                IQueryable<DAL.Entities.ImageEntity> listImages = images;
+                if (!adminData)
                     listImages = images.Where(t => t.IsPublic);
 
-                listImages = listImages.Reverse();
-                listImages = listImages.Pagination(starts, count, out int summary);
+                listImages = listImages.Reverse().Pagination(starts, count, out int summary);
 
                 var resultImages = listImages.ToList();
 
@@ -146,9 +141,9 @@ namespace PicoShelter_ApiServer.BLL.Services
             var profile = db.Profiles.Get(id);
             if (profile != null)
             {
-                IEnumerable<DAL.Entities.AlbumEntity> listAlbums = null;
+                IQueryable<DAL.Entities.AlbumEntity> listAlbums = null;
                 if (adminData)
-                    listAlbums = profile.ProfileAlbums.Select(t => t.Album);
+                    listAlbums = profile.ProfileAlbums.AsQueryable().Select(t => t.Album);
 
                 if (listAlbums != null)
                 {

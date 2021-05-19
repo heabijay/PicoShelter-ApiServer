@@ -5,7 +5,7 @@ namespace PicoShelter_ApiServer.BLL.Extensions
 {
     public static class PaginationExtension
     {
-        public static IEnumerable<T> Pagination<T>(this IEnumerable<T> collection, int? starts, int? count, out int summaryCount)
+        public static IQueryable<T> Pagination<T>(this IQueryable<T> collection, int? starts, int? count, out int summaryCount)
         {
             summaryCount = collection.Count();
 

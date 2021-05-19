@@ -48,7 +48,13 @@ namespace PicoShelter_ApiServer.Controllers
             stats.db.imagesCount = db.Images.GetAll().Count();
             stats.db.albumsCount = db.Albums.GetAll().Count();
             stats.db.accountsCount = db.Accounts.GetAll().Count();
-            stats.db.confirmations = db.Confirmations.GetAll().GroupBy(t => t.Type).Select(t => new KeyValuePair<string, int>(t.Key.ToString(), db.Confirmations.Where(x => x.Type == t.Key).Count())).ToDictionary(t => t.Key, t => t.Value);
+            var group = db.Confirmations.GetAll()
+                .GroupBy(t => t.Type);
+            var select = group.Select(t => t.Key);
+            var dict = select.ToList().ToDictionary(
+                    t => t.ToString(),
+                    t => db.Confirmations.Where(x => x.Type == t).Count()
+                    );
 
             
 
