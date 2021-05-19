@@ -5,6 +5,7 @@ using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -35,22 +36,22 @@ namespace PicoShelter_ApiServer.Services
 
                 // Images auto-delete task
                 var now = DateTime.UtcNow;
-                var images = db.Images.Where(t => t.DeleteIn <= now);
-                _logger.LogInformation($"Cleanup task running: {images.Length} images to delete");
+                var imageCodes = db.Images.Where(t => t.DeleteIn <= now).Select(t => t.ImageCode).ToList();
+                _logger.LogInformation($"Cleanup task running: {imageCodes.Count()} images to delete");
 
-                foreach (var image in images)
+                foreach (var code in imageCodes)
                 {
-                    _imageService.ForceDeleteImage(image.ImageCode);
+                    _imageService.ForceDeleteImage(code);
                 }
 
 
                 // Delete outdated confirmations
-                var confirmations = db.Confirmations.Where(t => t.ValidUntilUTC < now);
-                _logger.LogInformation($"Cleanup task running: {confirmations.Length} confirmations to delete");
+                var confirmationIds = db.Confirmations.Where(t => t.ValidUntilUTC < now).Select(t => t.Id).ToList();
+                _logger.LogInformation($"Cleanup task running: {confirmationIds.Count()} confirmations to delete");
 
-                foreach (var confirm in confirmations)
+                foreach (var id in confirmationIds)
                 {
-                    db.Confirmations.Delete(confirm.Id);
+                    db.Confirmations.Delete(id);
                 }
 
                 db.Save();

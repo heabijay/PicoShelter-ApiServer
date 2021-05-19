@@ -281,9 +281,10 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var confs = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString() /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
 
+            confs = confs.Pagination(starts, count, out int summary).ToList();
+
             var r = confs.Select(t => t.Account.MapToAccountInfo());
 
-            r = r.Pagination(starts, count, out int summary);
             return new PaginationResultDto<AccountInfoDto>(r.ToList(), summary);
         }
 

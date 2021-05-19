@@ -1,6 +1,7 @@
 ﻿using PicoShelter_ApiServer.DAL.EF;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PicoShelter_ApiServer.DAL.Abstract
@@ -24,10 +25,7 @@ namespace PicoShelter_ApiServer.DAL.Abstract
         }
         public virtual bool Any(Func<T, bool> predicate)
         {
-            lock (locker)
-            {
-                return db.Set<T>().Any(predicate);
-            }
+            return db.Set<T>().Any(predicate);
         }
         public virtual void Delete(int id)
         {
@@ -41,26 +39,17 @@ namespace PicoShelter_ApiServer.DAL.Abstract
 
         public virtual T FirstOrDefault(Func<T, bool> predicate)
         {
-            lock (locker)
-            {
-                return db.Set<T>().FirstOrDefault(predicate);
-            }
+            return db.Set<T>().FirstOrDefault(predicate);
         }
 
         public virtual T Get(int id)
         {
-            lock (locker)
-            {
-                return db.Set<T>().Find(id);
-            }
+            return db.Set<T>().Find(id);
         }
 
-        public virtual T[] GetAll()
+        public virtual IEnumerable<T> GetAll()
         {
-            lock (locker)
-            {
-                return db.Set<T>().ToArray();
-            }
+            return db.Set<T>().AsEnumerable();
         }
 
         public virtual void Update(T item)
@@ -71,12 +60,9 @@ namespace PicoShelter_ApiServer.DAL.Abstract
             }
         }
 
-        public virtual T[] Where(Func<T, bool> predicate)
+        public virtual IEnumerable<T> Where(Func<T, bool> predicate)
         {
-            lock (locker)
-            {
-                return db.Set<T>().Where(predicate).ToArray();
-            }
+            return db.Set<T>().Where(predicate);
         }
     }
 }

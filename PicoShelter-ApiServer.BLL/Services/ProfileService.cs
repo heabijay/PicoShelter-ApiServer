@@ -103,10 +103,13 @@ namespace PicoShelter_ApiServer.BLL.Services
                 if (adminData)
                     listAlbums = profile.ProfileAlbums.Select(t => t.Album).Reverse().Pagination(0, 12, out summaryAlbums);
 
+                var imagesResult = listImages?.ToList();
+                var albumsResult = listAlbums?.ToList();
+
                 return new(
                     accDto,
-                    new(listImages.Select(t => t.MapToShortInfo()).ToList(), summaryImages),
-                    new(listAlbums == null ? null : listAlbums.Select(t => t.MapToShortInfo()).ToList(), summaryAlbums)
+                    new(imagesResult.Select(t => t.MapToShortInfo()).ToList(), summaryImages),
+                    new(albumsResult == null ? null : albumsResult.Select(t => t.MapToShortInfo()).ToList(), summaryAlbums)
                 );
             }
 
@@ -129,7 +132,9 @@ namespace PicoShelter_ApiServer.BLL.Services
                 listImages = listImages.Reverse();
                 listImages = listImages.Pagination(starts, count, out int summary);
 
-                var dtos = listImages.Select(t => t.MapToShortInfo()).ToList();
+                var resultImages = listImages.ToList();
+
+                var dtos = resultImages.Select(t => t.MapToShortInfo()).ToList();
                 return new PaginationResultDto<ImageShortInfoDto>(dtos, summary);
             }
 
