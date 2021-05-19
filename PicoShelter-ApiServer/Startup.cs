@@ -45,13 +45,13 @@ namespace PicoShelter_ApiServer
         {
             var connectionStrings = Configuration.GetSection("ConnectionStrings");
             var defaultConnectionString = connectionStrings.GetValue<string>("DefaultConnection");
-            if (defaultConnectionString.StartsWith("EnviromentVariable=", StringComparison.OrdinalIgnoreCase))
+            if (defaultConnectionString.StartsWith("EnvironmentVariable=", StringComparison.OrdinalIgnoreCase))
             {
-                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnviromentVariable=", "", StringComparison.OrdinalIgnoreCase));
+                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnvironmentVariable=", "", StringComparison.OrdinalIgnoreCase));
             }
-            else if (defaultConnectionString.StartsWith("EnviromentVariableMySQL=", StringComparison.OrdinalIgnoreCase))
+            else if (defaultConnectionString.StartsWith("EnvironmentVariableMySQL=", StringComparison.OrdinalIgnoreCase))
             {
-                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnviromentVariableMySQL=", "", StringComparison.OrdinalIgnoreCase));
+                defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnvironmentVariableMySQL=", "", StringComparison.OrdinalIgnoreCase));
                 if (defaultConnectionString != null)
                     defaultConnectionString = MySQLToNetConnectionString(defaultConnectionString);
             }
