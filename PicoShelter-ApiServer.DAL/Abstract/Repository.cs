@@ -1,7 +1,6 @@
 ﻿using PicoShelter_ApiServer.DAL.EF;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -10,7 +9,7 @@ namespace PicoShelter_ApiServer.DAL.Abstract
     public abstract class Repository<T> : IRepository<T> where T : class, IEntity
     {
         protected ApplicationContext db;
-        protected object locker = new object();
+        protected static object locker = new object();
         public Repository(ApplicationContext context)
         {
             db = context;
