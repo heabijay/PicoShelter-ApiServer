@@ -2,7 +2,6 @@
 using ImageProcessor.Common.Exceptions;
 using ImageProcessor.Imaging;
 using ImageProcessor.Imaging.Formats;
-using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
@@ -10,7 +9,6 @@ using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -64,7 +62,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 using (Stream file = files.Avatars.CreateOrUpdate(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" }))
                 {
                     imageFactory.Save(file);
-                    
+
                 }
             }
         }

@@ -20,7 +20,7 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPost("create")]
-        public IActionResult CreateAlbum([FromBody]AlbumEditModel m)
+        public IActionResult CreateAlbum([FromBody] AlbumEditModel m)
         {
             int userId = int.Parse(User.Identity.Name);
 
@@ -41,7 +41,7 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPost("create-and-share")]
-        public IActionResult CreateAndShare([FromBody]AlbumCreateAndShareModel m)
+        public IActionResult CreateAndShare([FromBody] AlbumCreateAndShareModel m)
         {
             int userId = int.Parse(User.Identity.Name);
 

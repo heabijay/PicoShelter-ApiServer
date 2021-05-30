@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Interfaces;
-using PicoShelter_ApiServer.FDAL.Interfaces;
 using System;
 using System.Linq;
 using System.Threading;

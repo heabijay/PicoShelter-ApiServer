@@ -1,6 +1,5 @@
 ﻿using PicoShelter_ApiServer.DAL.Enums;
 using System;
-using System.Collections.Generic;
 
 namespace PicoShelter_ApiServer.BLL.DTO
 {

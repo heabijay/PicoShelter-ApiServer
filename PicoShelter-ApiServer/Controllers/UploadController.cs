@@ -7,7 +7,6 @@ using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
 using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace PicoShelter_ApiServer.Controllers
 {
@@ -25,7 +24,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpPost]
         [RequestSizeLimit(10000000)]
-        public IActionResult Upload([FromForm]UploadFormModel form)
+        public IActionResult Upload([FromForm] UploadFormModel form)
         {
             string idStr = User?.Identity?.Name;
             int? profileId = idStr == null ? null : int.Parse(idStr);

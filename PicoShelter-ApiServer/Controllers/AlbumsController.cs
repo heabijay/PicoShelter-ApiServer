@@ -3,16 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
-using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer.Controllers
 {
@@ -73,7 +70,7 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPut("a/{albumCode}")]
-        public IActionResult EditAlbum([FromRoute] string albumCode, [FromBody]AlbumEditModel m)
+        public IActionResult EditAlbum([FromRoute] string albumCode, [FromBody] AlbumEditModel m)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
@@ -398,7 +395,7 @@ namespace PicoShelter_ApiServer.Controllers
 
 
         [HttpPost("a/{albumCode}/invite")]
-        public IActionResult Invite(string albumCode, [FromBody]string username)
+        public IActionResult Invite(string albumCode, [FromBody] string username)
         {
             var albumId = _albumService.GetAlbumIdByCode(albumCode);
             if (albumId == null)
@@ -436,7 +433,7 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpDelete("a/{albumCode}/invite")]
-        public IActionResult DeleteInvite(string albumCode, [FromBody]int userId)
+        public IActionResult DeleteInvite(string albumCode, [FromBody] int userId)
         {
             int reqUserId = int.Parse(User.Identity.Name);
 

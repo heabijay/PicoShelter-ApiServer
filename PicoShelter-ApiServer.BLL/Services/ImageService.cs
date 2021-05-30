@@ -6,7 +6,6 @@ using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
-using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Collections;
@@ -108,7 +107,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                 return imageEntity.ImageCode;
             }
-        }     
+        }
 
         public Stream GetImage(string code, string extension, IValidator validator, out string typeExtension)
         {

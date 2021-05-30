@@ -1,5 +1,4 @@
 ﻿using PicoShelter_ApiServer.BLL.DTO;
-using PicoShelter_ApiServer.DAL.Entities;
 using System;
 using System.IO;
 

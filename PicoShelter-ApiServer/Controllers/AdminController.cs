@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PicoShelter_ApiServer.BLL.Interfaces;
@@ -10,11 +9,9 @@ using PicoShelter_ApiServer.Responses.Models;
 using PicoShelter_ApiServer.Responses.Models.Stats;
 using PicoShelter_ApiServer.Services;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer.Controllers
 {
@@ -56,7 +53,7 @@ namespace PicoShelter_ApiServer.Controllers
                     t => db.Confirmations.Where(x => x.Type == t).Count()
                     );
 
-            
+
 
             return new SuccessResponse(stats);
         }

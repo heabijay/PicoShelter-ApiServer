@@ -3,7 +3,7 @@ using PicoShelter_ApiServer.BLL.Infrastructure;
 
 namespace PicoShelter_ApiServer.Responses.Models
 {
-    public record ErrorDetailsModel 
+    public record ErrorDetailsModel
     {
         public string type { get; init; }
         public string message { get; init; }

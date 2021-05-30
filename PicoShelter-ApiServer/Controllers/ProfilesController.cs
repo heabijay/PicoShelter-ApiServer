@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.Responses;
-using System.IO;
 
 namespace PicoShelter_ApiServer.Controllers
 {
@@ -44,7 +42,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpHead("p/{username}/images")]
         [HttpGet("p/{username}/images")]
-        public IActionResult GetImages([FromRoute]string username, [FromQuery] int? starts, [FromQuery] int? count)
+        public IActionResult GetImages([FromRoute] string username, [FromQuery] int? starts, [FromQuery] int? count)
         {
             var id = _profileService.GetIdFromUsername(username);
             if (id == null)
@@ -70,7 +68,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpHead("p/{username}/albums")]
         [HttpGet("p/{username}/albums")]
-        public IActionResult GetAlbums([FromRoute]string username, [FromQuery] int? starts, [FromQuery] int? count)
+        public IActionResult GetAlbums([FromRoute] string username, [FromQuery] int? starts, [FromQuery] int? count)
         {
             var id = _profileService.GetIdFromUsername(username);
             if (id == null)

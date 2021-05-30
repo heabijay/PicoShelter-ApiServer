@@ -1,5 +1,4 @@
 ﻿using PicoShelter_ApiServer.BLL.DTO;
-using System.Collections.Generic;
 using System.IO;
 
 namespace PicoShelter_ApiServer.BLL.Interfaces

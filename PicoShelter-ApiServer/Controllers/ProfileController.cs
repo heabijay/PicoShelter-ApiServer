@@ -7,7 +7,6 @@ using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 
 namespace PicoShelter_ApiServer.Controllers
@@ -24,7 +23,7 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPut("edit")]
-        public IActionResult Edit([FromBody]ProfileEditModel m)
+        public IActionResult Edit([FromBody] ProfileEditModel m)
         {
             int id = int.Parse(User.Identity.Name);
             var mapper = new MapperConfiguration(c => c.CreateMap<ProfileEditModel, ProfileNameDto>()).CreateMapper();

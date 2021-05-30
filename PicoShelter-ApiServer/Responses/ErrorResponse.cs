@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.Responses.Models;
-using System.ComponentModel.DataAnnotations;
 
 namespace PicoShelter_ApiServer.Responses
 {

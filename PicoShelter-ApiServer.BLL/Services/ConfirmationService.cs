@@ -73,7 +73,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             return guid;
         }
 
-        public string Create(ConfirmationType type, string data = null, int ? timeoutInMinutes = null, int? linkToAccountId = null)
+        public string Create(ConfirmationType type, string data = null, int? timeoutInMinutes = null, int? linkToAccountId = null)
         {
             string token = CreateUniqueGuid();
             var item = new ConfirmationEntity()

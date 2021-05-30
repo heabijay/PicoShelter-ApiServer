@@ -1,14 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Interfaces;
-using PicoShelter_ApiServer.BLL.Services;
 using PicoShelter_ApiServer.Responses;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -32,7 +28,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpHead("confirm")]
         [HttpGet("confirm")]
-        public async Task<IActionResult> Confirm([FromQuery][Required]string key)
+        public async Task<IActionResult> Confirm([FromQuery][Required] string key)
         {
             string idStr = User?.Identity?.Name;
             int? id = idStr == null ? null : int.Parse(idStr);
@@ -46,7 +42,7 @@ namespace PicoShelter_ApiServer.Controllers
                     return NotFound();
                 }
 
-                switch(type)
+                switch (type)
                 {
                     case DAL.Enums.ConfirmationType.EmailChanging:
                         var timeout = 20;
@@ -90,7 +86,7 @@ namespace PicoShelter_ApiServer.Controllers
         public IActionResult ConfirmNewPassword(
             [FromQuery]
             [Required]
-            string key, 
+            string key,
             [FromBody]
             [DataType(DataType.Password)]
             [Required(ErrorMessage = "No Password specified", AllowEmptyStrings = false)]
@@ -119,7 +115,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpHead("getinfo")]
         [HttpGet("getinfo")]
-        public IActionResult GetInfo([FromQuery][Required]string key)
+        public IActionResult GetInfo([FromQuery][Required] string key)
         {
             string idStr = User?.Identity?.Name;
             int? id = idStr == null ? null : int.Parse(idStr);

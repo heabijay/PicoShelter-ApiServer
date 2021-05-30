@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,10 +16,8 @@ using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
-using PicoShelter_ApiServer.Responses.Models;
 using PicoShelter_ApiServer.Services;
 using System;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
@@ -39,7 +35,7 @@ namespace PicoShelter_ApiServer
         }
 
         public IConfiguration Configuration { get; }
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -123,7 +119,7 @@ namespace PicoShelter_ApiServer
 
             services.AddControllers();
             services.AddMvc()
-                .ConfigureApiBehaviorOptions(options => 
+                .ConfigureApiBehaviorOptions(options =>
                 {
                     //options.SuppressModelStateInvalidFilter = true;
                     options.InvalidModelStateResponseFactory = actionContext =>

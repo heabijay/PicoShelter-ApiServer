@@ -1,14 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PicoShelter_ApiServer.BLL.Bussiness_Logic;
 using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
-using PicoShelter_ApiServer.DAL.Interfaces;
-using PicoShelter_ApiServer.FDAL.Interfaces;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
-using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.IO;
 
@@ -52,7 +48,7 @@ namespace PicoShelter_ApiServer.Controllers
 
 
         [HttpPut("{code}")]
-        public IActionResult EditImage(string code, [FromBody]ImageEditModel m)
+        public IActionResult EditImage(string code, [FromBody] ImageEditModel m)
         {
             var idStr = User?.Identity?.Name;
             int? id = idStr == null ? null : int.Parse(idStr);

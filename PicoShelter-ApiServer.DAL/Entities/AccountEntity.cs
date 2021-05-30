@@ -16,7 +16,7 @@ namespace PicoShelter_ApiServer.DAL.Entities
         public virtual RoleEntity Role { get; set; }
 
         public virtual ProfileEntity Profile { get; set; }
-        
+
         public virtual List<ConfirmationEntity> Confirmations { get; set; }
     }
 }

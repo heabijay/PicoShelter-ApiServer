@@ -6,8 +6,6 @@ using PicoShelter_ApiServer.BLL.DTO.EmailMessagesDto;
 using PicoShelter_ApiServer.BLL.Formatters;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using System;
-using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer.BLL.Services

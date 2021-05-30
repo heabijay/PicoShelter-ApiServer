@@ -7,7 +7,6 @@ using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 

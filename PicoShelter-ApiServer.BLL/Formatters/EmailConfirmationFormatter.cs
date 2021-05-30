@@ -6,7 +6,7 @@ namespace PicoShelter_ApiServer.BLL.Formatters
     {
         public EmailConfirmationFormatter() : base("emailConfirmation.html")
         {
-            
+
         }
     }
 }

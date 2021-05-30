@@ -9,7 +9,7 @@ namespace PicoShelter_ApiServer.BLL.Extensions
         {
             {
                 ExceptionType.MODEL_NOT_VALID,
-                "Here is some validation errors in request." 
+                "Here is some validation errors in request."
             },
             {
                 ExceptionType.USERNAME_ALREADY_REGISTERED,
@@ -37,7 +37,7 @@ namespace PicoShelter_ApiServer.BLL.Extensions
             },
             {
                 ExceptionType.ADMIN_KICK_DISALLOWED,
-                "You couldn't kick administrator." 
+                "You couldn't kick administrator."
             },
             {
                 ExceptionType.USERCODE_ALREADY_TAKED,

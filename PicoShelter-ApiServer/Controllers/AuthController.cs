@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +9,11 @@ using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.Requests.Models;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace PicoShelter_ApiServer.Controllers
 {
@@ -35,7 +34,7 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody]AccountRegisterModel acc)
+        public async Task<IActionResult> Register([FromBody] AccountRegisterModel acc)
         {
             var mapper = new MapperConfiguration(c => c.CreateMap<AccountRegisterModel, AccountDto>()).CreateMapper();
             var dto = mapper.Map<AccountDto>(acc);
@@ -63,13 +62,13 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody]AccountLoginModel m)
+        public IActionResult Login([FromBody] AccountLoginModel m)
         {
             return GetToken(m.Username, m.Password);
         }
 
         [HttpPost("elogin")]
-        public IActionResult LoginEmail([FromBody]AccountLoginEmailModel m)
+        public IActionResult LoginEmail([FromBody] AccountLoginEmailModel m)
         {
             string username = _accountService.GetUsernameByEmail(m.Email);
 
@@ -101,7 +100,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpPut("changepassword")]
         [Authorize]
-        public IActionResult ChangePassword([FromBody]AccountChangePasswordModel m)
+        public IActionResult ChangePassword([FromBody] AccountChangePasswordModel m)
         {
             var id = int.Parse(User.Identity.Name);
             try
@@ -123,7 +122,7 @@ namespace PicoShelter_ApiServer.Controllers
             var id = int.Parse(User.Identity.Name);
             try
             {
-                var email =  _accountService.GetEmail(id);
+                var email = _accountService.GetEmail(id);
                 return new SuccessResponse(email);
             }
             catch (HandlingException ex)
@@ -134,7 +133,7 @@ namespace PicoShelter_ApiServer.Controllers
 
         [HttpPut("changeemail")]
         [Authorize]
-        public async Task<IActionResult> ChangeEmail([FromBody]string newEmail)
+        public async Task<IActionResult> ChangeEmail([FromBody] string newEmail)
         {
             var id = int.Parse(User.Identity.Name);
             newEmail = newEmail.Trim();
@@ -165,7 +164,7 @@ namespace PicoShelter_ApiServer.Controllers
         }
 
         [HttpPost("resetpassword")]
-        public async Task<IActionResult> ResetPassword([FromBody]string email)
+        public async Task<IActionResult> ResetPassword([FromBody] string email)
         {
             email = email.Trim();
             try
@@ -221,7 +220,7 @@ namespace PicoShelter_ApiServer.Controllers
 
             var userInfo = _accountService.GetAccountInfo(int.Parse(identity.Name));
 
-            return new SuccessResponse(new TokenResponseModel() 
+            return new SuccessResponse(new TokenResponseModel()
             {
                 access_token = jwtEncoded,
                 expires = expires,

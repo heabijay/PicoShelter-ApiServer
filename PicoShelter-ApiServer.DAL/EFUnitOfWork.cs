@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PicoShelter_ApiServer.DAL.EF;
+﻿using PicoShelter_ApiServer.DAL.EF;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.DAL.Repositories;
