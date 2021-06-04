@@ -4,11 +4,11 @@
     <img src="https://www.picoshelter.tk/assets/icons/picoShelter/Black%20Icon%20%2B%20Text.svg" height="64px">
 </p>
 
-The server part of the PicoShelter Project.
+The server part on ASP.NET of the PicoShelter Project.
 
 ## About PicoShelter Project
 
-_"PicoShelter is a free image hosting service with user profiles, shared albums, and direct links. Also, we provide the official desktop application for more comfortable experience."_
+_"PicoShelter is a free image hosting service with user profiles, shared albums, and direct links. Also, we provide the official desktop application for a more comfortable experience."_
 
 PicoShelter's [ApiServer](https://github.com/heabijay/PicoShelter-ApiServer), [WebApp](https://github.com/heabijay/PicoShelter-WebApp), [DesktopApp](https://github.com/heabijay/DesktopApp) were created by [heabijay](https://github.com/heabijay) as the diploma project.
 
