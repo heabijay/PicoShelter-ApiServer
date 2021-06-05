@@ -10,7 +10,7 @@ The server part on ASP.NET of the PicoShelter Project.
 
 _"PicoShelter is a free image hosting service with user profiles, shared albums, and direct links. Also, we provide the official desktop application for a more comfortable experience."_
 
-PicoShelter's [ApiServer](https://github.com/heabijay/PicoShelter-ApiServer), [WebApp](https://github.com/heabijay/PicoShelter-WebApp), [DesktopApp](https://github.com/heabijay/DesktopApp) were created by [heabijay](https://github.com/heabijay) as the diploma project.
+PicoShelter's [ApiServer](https://github.com/heabijay/PicoShelter-ApiServer), [WebApp](https://github.com/heabijay/PicoShelter-WebApp), [DesktopApp](https://github.com/heabijay/PicoShelter-DesktopApp) were created by [heabijay](https://github.com/heabijay) as the diploma project.
 
 ## Demo
 
