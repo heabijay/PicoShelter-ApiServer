@@ -51,4 +51,4 @@ You need to rename two configuration files and fill your own configuration:
     - `AuthOptions.Key` — Master password for JWT hasher.
     - `AuthOptions.Lifetime` — The timespan for JWT valid until.
 
-By default, File Repository with user's images using the "FileRepository" folder of execution assembly path. You could change it in `Startup.cs` _(~73 line with IFileUnitOfWork)_.
+By default, File Repository with user's images uses the "FileRepository" folder of execution assembly path. You could change it in `Startup.cs` _(~73 line with IFileUnitOfWork)_.
