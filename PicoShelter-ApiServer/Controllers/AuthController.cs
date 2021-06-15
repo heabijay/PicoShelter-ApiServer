@@ -21,10 +21,11 @@ namespace PicoShelter_ApiServer.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        IAccountService _accountService;
-        IEmailService _emailService;
-        IConfirmationService _confirmationService;
-        IConfiguration _configuration;
+        private readonly IAccountService _accountService;
+        private readonly IEmailService _emailService;
+        private readonly IConfirmationService _confirmationService;
+        private readonly IConfiguration _configuration;
+
         public AuthController(IAccountService accountService, IEmailService emailService, IConfirmationService confirmationService, IConfiguration configuration)
         {
             _accountService = accountService;
@@ -204,7 +205,7 @@ namespace PicoShelter_ApiServer.Controllers
             DateTime now = DateTime.UtcNow;
             DateTime expires = now + AuthOptions.LifeTime;
 
-            JwtSecurityToken jwt = new JwtSecurityToken(
+            var jwt = new JwtSecurityToken(
                 issuer: AuthOptions.Issuer,
                 audience: AuthOptions.Audience,
                 notBefore: now,
@@ -239,7 +240,7 @@ namespace PicoShelter_ApiServer.Controllers
                         new Claim(ClaimsIdentity.DefaultRoleClaimType, identity.role)
                     };
 
-                ClaimsIdentity claimsIdentity = new ClaimsIdentity(
+                var claimsIdentity = new ClaimsIdentity(
                     claims,
                     "Token",
                     ClaimsIdentity.DefaultNameClaimType,

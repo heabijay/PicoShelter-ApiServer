@@ -17,72 +17,69 @@ namespace PicoShelter_ApiServer.BLL.Services
 {
     public class ProfileService : IProfileService
     {
-        IUnitOfWork db;
-        IFileUnitOfWork files;
-        IAccountService _accountService;
+        private readonly IUnitOfWork _db;
+        private readonly IFileUnitOfWork _files;
+        private readonly IAccountService _accountService;
+
         public ProfileService(IUnitOfWork unit, IFileUnitOfWork funit, IAccountService accountService)
         {
-            db = unit;
-            files = funit;
+            _db = unit;
+            _files = funit;
             _accountService = accountService;
         }
 
         public void Edit(int id, ProfileNameDto dto)
         {
-            var profile = db.Profiles.Get(id);
+            var profile = _db.Profiles.Get(id);
             profile.Firstname = dto.firstname;
             profile.Lastname = dto.lastname;
-            db.Profiles.Update(profile);
-            db.Save();
+            _db.Profiles.Update(profile);
+            _db.Save();
         }
 
         public Stream GetAvatar(int id)
         {
-            var profile = files.Profiles.GetOrCreate(id);
-            return files.Avatars.Get(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
+            var profile = _files.Profiles.GetOrCreate(id);
+            return _files.Avatars.Get(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
         }
 
         public void SetAvatar(int id, Stream fs)
         {
-            var profile = files.Profiles.GetOrCreate(id);
-            using (ImageFactory imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.First })
-            {
-                try
-                {
-                    imageFactory.Load(fs);
-                }
-                catch (Exception ex) when ((ex is ImageFormatException) || (ex is NullReferenceException))
-                {
-                    throw new HandlingException(ExceptionType.INPUT_IMAGE_INVALID);
-                }
-                imageFactory.AutoRotate();
-                imageFactory.CropToThumbnail(256);
-                imageFactory.BackgroundColor(Color.White);
-                imageFactory.Format(new JpegFormat { Quality = 75 });
-                using (Stream file = files.Avatars.CreateOrUpdate(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" }))
-                {
-                    imageFactory.Save(file);
+            var profile = _files.Profiles.GetOrCreate(id);
 
-                }
+            using var imageFactory = new ImageFactory() { AnimationProcessMode = AnimationProcessMode.First };
+            try
+            {
+                imageFactory.Load(fs);
             }
+            catch (Exception ex) when ((ex is ImageFormatException) || (ex is NullReferenceException))
+            {
+                throw new HandlingException(ExceptionType.INPUT_IMAGE_INVALID);
+            }
+            imageFactory.AutoRotate();
+            imageFactory.CropToThumbnail(256);
+            imageFactory.BackgroundColor(Color.White);
+            imageFactory.Format(new JpegFormat { Quality = 75 });
+
+            using Stream file = _files.Avatars.CreateOrUpdate(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
+            imageFactory.Save(file);
         }
 
         public void DeleteAvatar(int id)
         {
-            var profile = files.Profiles.GetOrCreate(id);
-            files.Avatars.Delete(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
+            var profile = _files.Profiles.GetOrCreate(id);
+            _files.Avatars.Delete(new() { Profile = profile, Filename = profile.Id.ToString() + ".jpeg" });
         }
 
         public int? GetIdFromUsername(string username)
         {
-            var acc = db.Accounts.FirstOrDefault(t => t.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
+            var acc = _db.Accounts.FirstOrDefault(t => t.Username.Equals(username, StringComparison.OrdinalIgnoreCase));
             return acc?.Id;
         }
 
-
         public ProfileInfoDto GetProfileInfo(int id, bool adminData = false)
         {
-            var profile = db.Profiles.Get(id);
+            var profile = _db.Profiles.Get(id);
             if (profile != null)
             {
                 var accDto = _accountService.GetAccountInfo(id);
@@ -105,7 +102,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                 return new(
                     accDto,
                     new(imagesResult.Select(t => t.MapToShortInfo()).ToList(), summaryImages),
-                    new(albumsResult == null ? null : albumsResult.Select(t => t.MapToShortInfo()).ToList(), summaryAlbums)
+                    new(albumsResult?.Select(t => t.MapToShortInfo()).ToList(), summaryAlbums)
                 );
             }
 
@@ -114,7 +111,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? starts, int? count, bool adminData = false)
         {
-            var profile = db.Profiles.Get(id);
+            var profile = _db.Profiles.Get(id);
             if (profile != null)
             {
                 var images = profile.Images.AsQueryable();
@@ -136,7 +133,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public PaginationResultDto<AlbumShortInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false)
         {
-            var profile = db.Profiles.Get(id);
+            var profile = _db.Profiles.Get(id);
             if (profile != null)
             {
                 IQueryable<DAL.Entities.AlbumEntity> listAlbums = null;

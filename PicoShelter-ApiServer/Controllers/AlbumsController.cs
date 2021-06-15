@@ -17,12 +17,13 @@ namespace PicoShelter_ApiServer.Controllers
     [Authorize]
     public class AlbumsController : ControllerBase
     {
-        IAlbumService _albumService;
-        IAccountService _accountService;
-        IConfirmationService _confirmationService;
-        IEmailService _emailService;
-        IConfiguration _configuration;
-        IUnitOfWork db;
+        private readonly IAlbumService _albumService;
+        private readonly IAccountService _accountService;
+        private readonly IConfirmationService _confirmationService;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly IUnitOfWork _db;
+
         public AlbumsController(IAlbumService albumService, IAccountService accountService, IConfirmationService confirmationService, IEmailService emailService, IConfiguration configuration, IUnitOfWork uof)
         {
             _albumService = albumService;
@@ -30,7 +31,7 @@ namespace PicoShelter_ApiServer.Controllers
             _confirmationService = confirmationService;
             _emailService = emailService;
             _configuration = configuration;
-            db = uof;
+            _db = uof;
         }
 
 
@@ -408,7 +409,7 @@ namespace PicoShelter_ApiServer.Controllers
             try
             {
                 var acc = _accountService.GetAccountInfo(id.Value);
-                var album = db.Albums.Get(albumId.Value);
+                var album = _db.Albums.Get(albumId.Value);
                 var email = _accountService.GetEmail(id.Value);
                 TimeSpan validTime = TimeSpan.FromDays(30);
                 var token = _confirmationService.CreateAlbumInvite(albumId.Value, id.Value, (int)validTime.TotalMinutes);

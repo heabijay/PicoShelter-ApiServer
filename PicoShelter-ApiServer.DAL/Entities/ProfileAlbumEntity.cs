@@ -3,7 +3,7 @@ using PicoShelter_ApiServer.DAL.Enums;
 
 namespace PicoShelter_ApiServer.DAL.Entities
 {
-    public class ProfileAlbumEntity : Entity
+    public class ProfileAlbumEntity : EntityBase
     {
         public int ProfileId { get; set; }
         public virtual ProfileEntity Profile { get; set; }

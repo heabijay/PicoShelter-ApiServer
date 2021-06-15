@@ -103,8 +103,7 @@ namespace PicoShelter_ApiServer
                     {
                         OnTokenValidated = context =>
                         {
-                            var token = context.SecurityToken as JwtSecurityToken;
-                            if (token != null)
+                            if (context.SecurityToken is JwtSecurityToken token)
                             {
                                 var id = int.Parse(token.Claims.FirstOrDefault().Value);
                                 var accountService = context.HttpContext.RequestServices.GetService<IAccountService>();
@@ -150,7 +149,7 @@ namespace PicoShelter_ApiServer
                             Id = "Bearer"
                         }
                      },
-                     new string[] { }
+                     Array.Empty<string>()
                 }});
 
                 options.SwaggerDoc(

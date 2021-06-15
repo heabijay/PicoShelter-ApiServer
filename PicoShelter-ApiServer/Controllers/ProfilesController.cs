@@ -7,12 +7,12 @@ namespace PicoShelter_ApiServer.Controllers
     [ApiController]
     public class ProfilesController : ControllerBase
     {
-        IProfileService _profileService;
+        private readonly IProfileService _profileService;
+
         public ProfilesController(IProfileService profileService)
         {
             _profileService = profileService;
         }
-
 
         [HttpHead("p/{username}")]
         [HttpGet("p/{username}")]

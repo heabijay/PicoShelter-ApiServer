@@ -12,12 +12,12 @@ namespace PicoShelter_ApiServer.BLL.Formatters
         }
 
         protected string TemplateFilename { get; set; }
-        private static object templateFileLocker { get; set; } = new object();
+        private static object _templateFileLocker { get; set; } = new object();
 
-        private static string _TemplateText { get; set; }
+        private static string _templateText { get; set; }
         public string TemplateText
         {
-            get => _TemplateText ??= ReadTemplate(TemplateFilename);
+            get => _templateText ??= ReadTemplate(TemplateFilename);
         }
 
         public virtual string Format(T instance)
@@ -40,7 +40,7 @@ namespace PicoShelter_ApiServer.BLL.Formatters
 
         protected virtual string ReadTemplate(string templateFilename)
         {
-            lock (templateFileLocker)
+            lock (_templateFileLocker)
             {
                 try
                 {

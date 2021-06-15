@@ -6,57 +6,58 @@ using System.Linq.Expressions;
 
 namespace PicoShelter_ApiServer.DAL.Abstract
 {
-    public abstract class Repository<T> : IRepository<T> where T : class, IEntity
+    public abstract class RepositoryBase<T> : IRepository<T> where T : class, IEntity
     {
-        protected ApplicationContext db;
-        protected static object locker = new object();
-        public Repository(ApplicationContext context)
+        private protected readonly ApplicationContext _db;
+        private protected readonly static object _locker = new();
+
+        public RepositoryBase(ApplicationContext context)
         {
-            db = context;
+            _db = context;
         }
 
         public virtual void Add(T item)
         {
             item.CreatedDateUTC = DateTime.UtcNow;
-            lock (locker)
+            lock (_locker)
             {
-                db.Set<T>().Add(item);
+                _db.Set<T>().Add(item);
             }
         }
         public virtual bool Any(Func<T, bool> predicate)
         {
-            return db.Set<T>().Any(predicate);
+            return _db.Set<T>().Any(predicate);
         }
         public virtual void Delete(int id)
         {
-            lock (locker)
+            lock (_locker)
             {
-                var acc = db.Set<T>().Find(id);
+                var acc = _db.Set<T>().Find(id);
                 if (acc != null)
-                    db.Set<T>().Remove(acc);
+                    _db.Set<T>().Remove(acc);
             }
         }
 
         public virtual T FirstOrDefault(Func<T, bool> predicate)
         {
-            return db.Set<T>().FirstOrDefault(predicate);
+            return _db.Set<T>().FirstOrDefault(predicate);
         }
 
         public virtual T Get(int id)
         {
-            return db.Set<T>().Find(id);
+            return _db.Set<T>().Find(id);
         }
 
         public virtual IQueryable<T> GetAll()
         {
-            return db.Set<T>().AsQueryable();
+            return _db.Set<T>().AsQueryable();
         }
 
         public virtual void Update(T item)
         {
-            lock (locker)
+            lock (_locker)
             {
-                db.Set<T>().Update(item);
+                _db.Set<T>().Update(item);
             }
         }
 

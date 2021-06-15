@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PicoShelter_ApiServer.DAL.Entities
 {
-    public class ProfileEntity : Entity
+    public class ProfileEntity : EntityBase
     {
         [NotMapped]
         public new int Id { get => AccountId; }

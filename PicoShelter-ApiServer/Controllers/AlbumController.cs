@@ -13,7 +13,8 @@ namespace PicoShelter_ApiServer.Controllers
     [Authorize]
     public class AlbumController : ControllerBase
     {
-        IAlbumService _albumService;
+        private readonly IAlbumService _albumService;
+
         public AlbumController(IAlbumService albumService)
         {
             _albumService = albumService;

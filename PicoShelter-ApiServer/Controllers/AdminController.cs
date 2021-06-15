@@ -20,12 +20,13 @@ namespace PicoShelter_ApiServer.Controllers
     [Authorize(Roles = "admin")]
     public class AdminController : ControllerBase
     {
-        IUnitOfWork db;
-        IImageService _imageService;
-        IServiceProvider _serviceProvider;
+        private readonly IUnitOfWork _db;
+        private readonly IImageService _imageService;
+        private readonly IServiceProvider _serviceProvider;
+
         public AdminController(IUnitOfWork unit, IImageService imageService, IServiceProvider serviceProvider)
         {
-            db = unit;
+            _db = unit;
             _imageService = imageService;
             _serviceProvider = serviceProvider;
         }
@@ -34,23 +35,25 @@ namespace PicoShelter_ApiServer.Controllers
         [HttpGet("stats")]
         public IActionResult GetStats()
         {
-            var stats = new StatsModel();
-            stats.drives = DriveInfo.GetDrives().Where(t => t.IsReady).Select(t => new DriveInfoModel(t)).ToList();
+            var stats = new StatsModel
+            {
+                drives = DriveInfo.GetDrives().Where(t => t.IsReady).Select(t => new DriveInfoModel(t)).ToList()
+            };
 
             foreach (var drive in stats.drives)
                 if (drive.driveName == Path.GetPathRoot(Assembly.GetExecutingAssembly().Location))
                     drive.isRepository = true;
 
             stats.db = new();
-            stats.db.imagesCount = db.Images.GetAll().Count();
-            stats.db.albumsCount = db.Albums.GetAll().Count();
-            stats.db.accountsCount = db.Accounts.GetAll().Count();
-            var group = db.Confirmations.GetAll()
+            stats.db.imagesCount = _db.Images.GetAll().Count();
+            stats.db.albumsCount = _db.Albums.GetAll().Count();
+            stats.db.accountsCount = _db.Accounts.GetAll().Count();
+            var group = _db.Confirmations.GetAll()
                 .GroupBy(t => t.Type);
             var select = group.Select(t => t.Key);
             var dict = select.ToList().ToDictionary(
                     t => t.ToString(),
-                    t => db.Confirmations.Where(x => x.Type == t).Count()
+                    t => _db.Confirmations.Where(x => x.Type == t).Count()
                     );
 
 

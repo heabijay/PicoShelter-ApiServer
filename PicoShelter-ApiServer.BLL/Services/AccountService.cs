@@ -12,17 +12,18 @@ namespace PicoShelter_ApiServer.BLL.Services
 {
     public class AccountService : IAccountService
     {
-        IUnitOfWork database;
-        IFileUnitOfWork files;
+        private readonly IUnitOfWork _database;
+        private readonly IFileUnitOfWork _files;
+
         public AccountService(IUnitOfWork unit, IFileUnitOfWork funit)
         {
-            database = unit;
-            files = funit;
+            _database = unit;
+            _files = funit;
         }
 
         public bool TokenCheckPasswordChange(int id, DateTime validFrom)
         {
-            var acc = database.Accounts.Get(id);
+            var acc = _database.Accounts.Get(id);
             if (acc?.LastCredentialsChange > validFrom)
                 return false;
 
@@ -32,12 +33,12 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public bool IsEmailAlreadyRegistered(string email)
         {
-            return database.Accounts.Any(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
+            return _database.Accounts.Any(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
         }
 
         public void RegisterValidation(string username, string email)
         {
-            var usernameRegistered = database.Accounts.Any(t => t.Username.Equals(username, System.StringComparison.OrdinalIgnoreCase));
+            var usernameRegistered = _database.Accounts.Any(t => t.Username.Equals(username, System.StringComparison.OrdinalIgnoreCase));
             if (usernameRegistered)
                 throw new HandlingException(ExceptionType.USERNAME_ALREADY_REGISTERED);
 
@@ -73,28 +74,28 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             RegisterValidation(accountEntity.Username, accountEntity.Email);
 
-            database.Accounts.Add(accountEntity);
-            database.Save();
+            _database.Accounts.Add(accountEntity);
+            _database.Save();
 
             var profileEntity = new ProfileEntity()
             {
                 Account = accountEntity
             };
-            database.Profiles.Add(profileEntity);
-            database.Save();
+            _database.Profiles.Add(profileEntity);
+            _database.Save();
         }
 
         public AccountIdentityDto Login(AccountLoginDto _dto)
         {
             var dto = _dto with { username = _dto.username.Trim() };
 
-            var account = database.Accounts.FirstOrDefault(t => t.Username.Equals(dto.username.Trim(), System.StringComparison.OrdinalIgnoreCase));
+            var account = _database.Accounts.FirstOrDefault(t => t.Username.Equals(dto.username.Trim(), System.StringComparison.OrdinalIgnoreCase));
             if (account != null)
             {
                 var isPwdCorrect = SecurePasswordHasher.Verify(dto.password, account.Password);
                 if (isPwdCorrect)
                 {
-                    var role = database.Roles.Get(account.RoleId);
+                    var role = _database.Roles.Get(account.RoleId);
                     return new(account.Id, role.Name);
                 }
             }
@@ -106,7 +107,7 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             email = email.Trim();
 
-            var account = database.Accounts.FirstOrDefault(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
+            var account = _database.Accounts.FirstOrDefault(t => t.Email.Equals(email, System.StringComparison.OrdinalIgnoreCase));
             if (account != null)
             {
                 return account.Username;
@@ -117,13 +118,13 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public int? GetAccountId(string username)
         {
-            var account = database.Accounts.FirstOrDefault(t => t.Username.Equals(username, System.StringComparison.OrdinalIgnoreCase));
+            var account = _database.Accounts.FirstOrDefault(t => t.Username.Equals(username, System.StringComparison.OrdinalIgnoreCase));
             return account?.Id;
         }
 
         public void ChangePassword(AccountChangePasswordDto dto)
         {
-            var account = database.Accounts.Get(dto.id);
+            var account = _database.Accounts.Get(dto.id);
             if (account == null)
                 throw new HandlingException(ExceptionType.USER_NOT_FOUND);
 
@@ -133,25 +134,25 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             account.Password = SecurePasswordHasher.Hash(dto.newPwd);
             account.LastCredentialsChange = DateTime.UtcNow;
-            database.Accounts.Update(account);
-            database.Save();
+            _database.Accounts.Update(account);
+            _database.Save();
         }
 
         public void ForceSetPassword(int id, string newPwd)
         {
-            var account = database.Accounts.Get(id);
+            var account = _database.Accounts.Get(id);
             if (account == null)
                 throw new HandlingException(ExceptionType.USER_NOT_FOUND);
 
             account.Password = SecurePasswordHasher.Hash(newPwd);
             account.LastCredentialsChange = DateTime.UtcNow;
-            database.Accounts.Update(account);
-            database.Save();
+            _database.Accounts.Update(account);
+            _database.Save();
         }
 
         public string GetEmail(int accountId)
         {
-            var account = database.Accounts.Get(accountId);
+            var account = _database.Accounts.Get(accountId);
             if (account == null)
                 throw new HandlingException(ExceptionType.USER_NOT_FOUND);
 
@@ -160,26 +161,26 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public void ChangeEmail(int accountId, string newEmail)
         {
-            var account = database.Accounts.Get(accountId);
+            var account = _database.Accounts.Get(accountId);
             if (account == null)
                 throw new HandlingException(ExceptionType.USER_NOT_FOUND);
 
             account.Email = newEmail;
-            database.Accounts.Update(account);
-            database.Save();
+            _database.Accounts.Update(account);
+            _database.Save();
         }
 
         public void DeleteAccount(int id)
         {
-            database.Accounts.Delete(id);
-            database.Save();
-            var fileProfile = files.Profiles.GetOrCreate(id);
-            files.Profiles.Clear(fileProfile);
+            _database.Accounts.Delete(id);
+            _database.Save();
+            var fileProfile = _files.Profiles.GetOrCreate(id);
+            _files.Profiles.Clear(fileProfile);
         }
 
         public AccountIdentityDto GetIdentity(int id)
         {
-            var acc = database.Accounts.Get(id);
+            var acc = _database.Accounts.Get(id);
             if (acc != null)
                 return new(acc.Id, acc.Role.Name);
 
@@ -188,7 +189,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public AccountInfoDto GetAccountInfo(int id)
         {
-            var acc = database.Accounts.Get(id);
+            var acc = _database.Accounts.Get(id);
             if (acc != null)
             {
                 return acc.MapToAccountInfo();

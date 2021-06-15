@@ -18,95 +18,94 @@ namespace PicoShelter_ApiServer.BLL.Services
 {
     public class ImageService : IImageService
     {
-        IUnitOfWork db;
-        IFileUnitOfWork files;
-        IAccountService _accountService;
+        private readonly IUnitOfWork _db;
+        private readonly IFileUnitOfWork _files;
+        private readonly IAccountService _accountService;
+
         public ImageService(IUnitOfWork unit, IFileUnitOfWork funit, IAccountService accountService)
         {
-            db = unit;
-            files = funit;
+            _db = unit;
+            _files = funit;
             _accountService = accountService;
         }
 
         public string AddImage(ImageDto dto)
         {
-            using (ImageFactory factory = new ImageFactory() { AnimationProcessMode = ImageProcessor.Imaging.AnimationProcessMode.First })
+            using ImageFactory factory = new() { AnimationProcessMode = ImageProcessor.Imaging.AnimationProcessMode.First };
+            try
             {
-                try
-                {
-                    factory.Load(dto.inputStream);
-                }
-                catch (Exception ex) when ((ex is ImageFormatException) || (ex is NullReferenceException))
-                {
-                    throw new HandlingException(ExceptionType.INPUT_IMAGE_INVALID);
-                }
-
-                factory.AutoRotate();
-                if (dto.quality != 100)
-                {
-                    factory.BackgroundColor(Color.White);
-                    factory.Format(new JpegFormat() { Quality = dto.quality });
-                }
-
-                var imageEntity = new ImageEntity()
-                {
-                    Title = dto.title,
-                    DeleteIn = dto.deletein,
-                    ProfileId = dto.ownerProfileId,
-                    IsPublic = dto.isPublic,
-                    Extension = factory.CurrentImageFormat.DefaultExtension
-                };
-                db.Images.Add(imageEntity);
-                db.Save();
-                imageEntity.ImageCode = NumberToCodeConventer.Convert(imageEntity.Id);
-                db.Images.Update(imageEntity);
-                db.Save();
-
-                FDAL.Entities.ThumbnailEntity fsThumbnailEntity = new()
-                {
-                    Filename = imageEntity.ImageCode + ".jpeg"
-                };
-                FDAL.Entities.ImageEntity fsImageEntity = new()
-                {
-                    Thumbnail = fsThumbnailEntity,
-                    Filename = imageEntity.ImageCode + '.' + imageEntity.Extension
-                };
-                fsThumbnailEntity.BaseImage = fsImageEntity;
-
-                ImageCollection profileImages;
-                ThumbnailCollection profileThumbnails;
-                if (dto.ownerProfileId == null)
-                {
-                    profileImages = files.Anonymous.Images;
-                    profileThumbnails = files.Anonymous.Thumbnails;
-                }
-                else
-                {
-                    var profile = files.Profiles.GetOrCreate(dto.ownerProfileId.Value);
-                    fsImageEntity.Profile = profile;
-
-                    profileImages = profile.Images;
-                    profileThumbnails = profile.Thumbnails;
-                }
-
-                using (Stream fsImageStream = profileImages.CreateOrUpdate(fsImageEntity))
-                {
-                    if (dto.quality != 100)
-                        factory.Save(fsImageStream);
-                    else
-                        dto.inputStream.CopyTo(fsImageStream);
-                }
-
-                factory.Reset();
-                factory.AutoRotate();
-                factory.CropToThumbnail(128);
-                factory.BackgroundColor(Color.White);
-                factory.Format(new JpegFormat());
-                using (Stream fsThumbnailStream = profileThumbnails.CreateOrUpdate(fsThumbnailEntity))
-                    factory.Save(fsThumbnailStream);
-
-                return imageEntity.ImageCode;
+                factory.Load(dto.inputStream);
             }
+            catch (Exception ex) when ((ex is ImageFormatException) || (ex is NullReferenceException))
+            {
+                throw new HandlingException(ExceptionType.INPUT_IMAGE_INVALID);
+            }
+
+            factory.AutoRotate();
+            if (dto.quality != 100)
+            {
+                factory.BackgroundColor(Color.White);
+                factory.Format(new JpegFormat() { Quality = dto.quality });
+            }
+
+            var imageEntity = new ImageEntity()
+            {
+                Title = dto.title,
+                DeleteIn = dto.deletein,
+                ProfileId = dto.ownerProfileId,
+                IsPublic = dto.isPublic,
+                Extension = factory.CurrentImageFormat.DefaultExtension
+            };
+            _db.Images.Add(imageEntity);
+            _db.Save();
+            imageEntity.ImageCode = NumberToCodeConventer.Convert(imageEntity.Id);
+            _db.Images.Update(imageEntity);
+            _db.Save();
+
+            FDAL.Entities.ThumbnailEntity fsThumbnailEntity = new()
+            {
+                Filename = imageEntity.ImageCode + ".jpeg"
+            };
+            FDAL.Entities.ImageEntity fsImageEntity = new()
+            {
+                Thumbnail = fsThumbnailEntity,
+                Filename = imageEntity.ImageCode + '.' + imageEntity.Extension
+            };
+            fsThumbnailEntity.BaseImage = fsImageEntity;
+
+            ImageCollection profileImages;
+            ThumbnailCollection profileThumbnails;
+            if (dto.ownerProfileId == null)
+            {
+                profileImages = _files.Anonymous.Images;
+                profileThumbnails = _files.Anonymous.Thumbnails;
+            }
+            else
+            {
+                var profile = _files.Profiles.GetOrCreate(dto.ownerProfileId.Value);
+                fsImageEntity.Profile = profile;
+
+                profileImages = profile.Images;
+                profileThumbnails = profile.Thumbnails;
+            }
+
+            using (Stream fsImageStream = profileImages.CreateOrUpdate(fsImageEntity))
+            {
+                if (dto.quality != 100)
+                    factory.Save(fsImageStream);
+                else
+                    dto.inputStream.CopyTo(fsImageStream);
+            }
+
+            factory.Reset();
+            factory.AutoRotate();
+            factory.CropToThumbnail(128);
+            factory.BackgroundColor(Color.White);
+            factory.Format(new JpegFormat());
+            using (Stream fsThumbnailStream = profileThumbnails.CreateOrUpdate(fsThumbnailEntity))
+                factory.Save(fsThumbnailStream);
+
+            return imageEntity.ImageCode;
         }
 
         public Stream GetImage(string code, string extension, IValidator validator, out string typeExtension)
@@ -114,7 +113,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var id = GetImageIdByCode(code);
             if (id != null)
             {
-                var image = db.Images.Get(id.Value);
+                var image = _db.Images.Get(id.Value);
 
                 // Auto Delete Check
                 if (image.DeleteIn < DateTime.UtcNow)
@@ -132,13 +131,14 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     if (validator.Validate())
                     {
+                        var imageEntity = new FDAL.Entities.ImageEntity() { Filename = image.ImageCode + '.' + image.Extension };
+
                         // Receiving file
-                        Stream result = null;
-                        FDAL.Entities.ImageEntity imageEntity = new FDAL.Entities.ImageEntity() { Filename = image.ImageCode + '.' + image.Extension };
+                        Stream result;
                         if (image.ProfileId == null)
-                            result = files.Anonymous.Images.Get(imageEntity);
+                            result = _files.Anonymous.Images.Get(imageEntity);
                         else
-                            result = files.Profiles.GetOrCreate(image.ProfileId.Value).Images.Get(imageEntity);
+                            result = _files.Profiles.GetOrCreate(image.ProfileId.Value).Images.Get(imageEntity);
 
                         if (result == null)
                             throw new IOException();
@@ -158,7 +158,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var id = GetImageIdByCode(code);
             if (id != null)
             {
-                var image = db.Images.Get(id.Value);
+                var image = _db.Images.Get(id.Value);
 
                 // Auto Delete Check
                 if (image.DeleteIn < DateTime.UtcNow)
@@ -171,13 +171,14 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                 if (validator.Validate())
                 {
-                    // Receiving file
-                    Stream result = null;
                     FDAL.Entities.ThumbnailEntity thumbnailEntity = new() { Filename = image.ImageCode + ".jpeg" };
+
+                    // Receiving file
+                    Stream result;
                     if (image.ProfileId == null)
-                        result = files.Anonymous.Thumbnails.Get(thumbnailEntity);
+                        result = _files.Anonymous.Thumbnails.Get(thumbnailEntity);
                     else
-                        result = files.Profiles.GetOrCreate(image.ProfileId.Value).Thumbnails.Get(thumbnailEntity);
+                        result = _files.Profiles.GetOrCreate(image.ProfileId.Value).Thumbnails.Get(thumbnailEntity);
 
                     if (result == null)
                         throw new IOException();
@@ -193,7 +194,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public int? GetImageIdByCode(string code)
         {
-            var image = db.Images.FirstOrDefault(t => t.ImageCode.Equals(code, StringComparison.OrdinalIgnoreCase));
+            var image = _db.Images.FirstOrDefault(t => t.ImageCode.Equals(code, StringComparison.OrdinalIgnoreCase));
             return image?.Id;
         }
 
@@ -202,7 +203,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var id = GetImageIdByCode(code);
             if (id != null)
             {
-                var image = db.Images.Get(id.Value);
+                var image = _db.Images.Get(id.Value);
 
                 // Auto Delete Check
                 if (image.DeleteIn < DateTime.UtcNow)
@@ -241,7 +242,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var id = GetImageIdByCode(code);
             if (id != null)
             {
-                var image = db.Images.Get(id.Value);
+                var image = _db.Images.Get(id.Value);
                 if (image.ProfileId == requesterId)
                 {
                     ForceDeleteImage(code);
@@ -259,32 +260,31 @@ namespace PicoShelter_ApiServer.BLL.Services
             var id = GetImageIdByCode(code);
             if (id != null)
             {
-                var image = db.Images.Get(id.Value);
+                var image = _db.Images.Get(id.Value);
                 if (image.ProfileId == null)
                 {
-                    files.Anonymous.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
-                    files.Anonymous.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
+                    _files.Anonymous.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
+                    _files.Anonymous.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
                 }
                 else
                 {
-                    var filesProfile = files.Profiles.GetOrCreate(image.ProfileId.Value);
+                    var filesProfile = _files.Profiles.GetOrCreate(image.ProfileId.Value);
                     filesProfile.Images.Remove(new() { Filename = image.ImageCode + '.' + image.Extension });
                     filesProfile.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
                 }
 
-                db.Images.Delete(id.Value);
-                db.Save();
+                _db.Images.Delete(id.Value);
+                _db.Save();
                 return;
             }
         }
-
 
         public void EditImage(string code, int requesterId, ImageEditDto dto)
         {
             var id = GetImageIdByCode(code);
             if (id != null)
             {
-                var image = db.Images.Get(id.Value);
+                var image = _db.Images.Get(id.Value);
 
                 // Auto Delete Check
                 if (image.DeleteIn < DateTime.UtcNow)
@@ -304,8 +304,8 @@ namespace PicoShelter_ApiServer.BLL.Services
                     if (dto.isChangeLifetime)
                         image.DeleteIn = dto.deletein;
 
-                    db.Images.Update(image);
-                    db.Save();
+                    _db.Images.Update(image);
+                    _db.Save();
                     return;
                 }
 
@@ -320,13 +320,13 @@ namespace PicoShelter_ApiServer.BLL.Services
             var id = GetImageIdByCode(code);
             if (id != null)
             {
-                var image = db.Images.Get(id.Value);
+                var image = _db.Images.Get(id.Value);
                 if (image.ProfileId == requesterId)
                 {
                     image.IsPublic = isPublic;
 
-                    db.Images.Update(image);
-                    db.Save();
+                    _db.Images.Update(image);
+                    _db.Save();
                     return;
                 }
 

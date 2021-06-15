@@ -14,16 +14,18 @@ namespace PicoShelter_ApiServer.BLL.Services
 {
     public class AlbumService : IAlbumService
     {
-        IUnitOfWork db;
-        IImageService _imageService;
+        private readonly IUnitOfWork _db;
+        private readonly IImageService _imageService;
+
         public AlbumService(IUnitOfWork unit, IImageService imageService)
         {
-            db = unit;
+            _db = unit;
             _imageService = imageService;
         }
+
         public int CreateAlbum(AlbumEditDto dto)
         {
-            var isUsercodeRegistered = db.Albums.Any(t => t.UserCode?.Equals(dto.userCode, StringComparison.OrdinalIgnoreCase) ?? false);
+            var isUsercodeRegistered = _db.Albums.Any(t => t.UserCode?.Equals(dto.userCode, StringComparison.OrdinalIgnoreCase) ?? false);
             if (isUsercodeRegistered)
                 throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
 
@@ -33,8 +35,8 @@ namespace PicoShelter_ApiServer.BLL.Services
                 Title = dto.title,
                 UserCode = dto.userCode
             };
-            db.Albums.Add(entity);
-            db.Save();
+            _db.Albums.Add(entity);
+            _db.Save();
 
             entity.Code = NumberToCodeConventer.Convert(entity.Id);
 
@@ -44,33 +46,33 @@ namespace PicoShelter_ApiServer.BLL.Services
                 ProfileId = dto.ownerId,
                 Role = DAL.Enums.AlbumUserRole.admin,
             };
-            db.ProfileAlbums.Add(profileEntity);
-            db.Save();
+            _db.ProfileAlbums.Add(profileEntity);
+            _db.Save();
 
             return entity.Id;
         }
 
         public void SetUsercode(int albumId, string usercode)
         {
-            var isExist = db.Albums.Any(t => t.UserCode.Equals(usercode, StringComparison.OrdinalIgnoreCase));
+            var isExist = _db.Albums.Any(t => t.UserCode.Equals(usercode, StringComparison.OrdinalIgnoreCase));
             if (isExist)
                 throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
 
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             album.Code = usercode;
-            db.Albums.Update(album);
-            db.Save();
+            _db.Albums.Update(album);
+            _db.Save();
         }
 
         public void EditAlbum(int albumId, AlbumEditDto dto)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             if (dto?.userCode != null && !dto.userCode.Equals(album.UserCode, StringComparison.OrdinalIgnoreCase))
             {
-                var isExist = db.Albums.Any(t => t?.UserCode?.Equals(dto?.userCode, StringComparison.OrdinalIgnoreCase) ?? false);
+                var isExist = _db.Albums.Any(t => t?.UserCode?.Equals(dto?.userCode, StringComparison.OrdinalIgnoreCase) ?? false);
                 if (isExist)
                     throw new HandlingException(ExceptionType.USERCODE_ALREADY_TAKED);
             }
@@ -79,35 +81,35 @@ namespace PicoShelter_ApiServer.BLL.Services
             album.UserCode = dto.userCode;
             album.IsPublic = dto.isPublic;
 
-            db.Albums.Update(album);
-            db.Save();
+            _db.Albums.Update(album);
+            _db.Save();
         }
 
         public void DeleteAlbum(int id)
         {
-            db.Albums.Delete(id);
-            var invites = db.Confirmations.Where(t => t.Data == id.ToString());
+            _db.Albums.Delete(id);
+            var invites = _db.Confirmations.Where(t => t.Data == id.ToString());
             foreach (var invite in invites)
             {
-                db.Confirmations.Delete(invite.Id);
+                _db.Confirmations.Delete(invite.Id);
             }
-            db.Save();
+            _db.Save();
 
         }
 
         public int? GetAlbumIdByCode(string code)
         {
-            return db.Albums.FirstOrDefault(t => t.Code.Equals(code, StringComparison.OrdinalIgnoreCase))?.Id;
+            return _db.Albums.FirstOrDefault(t => t.Code.Equals(code, StringComparison.OrdinalIgnoreCase))?.Id;
         }
 
         public int? GetAlbumIdByUserCode(string userCode)
         {
-            return db.Albums.FirstOrDefault(t => t.UserCode?.Equals(userCode, StringComparison.OrdinalIgnoreCase) ?? false)?.Id;
+            return _db.Albums.FirstOrDefault(t => t.UserCode?.Equals(userCode, StringComparison.OrdinalIgnoreCase) ?? false)?.Id;
         }
 
         public bool VerifyImageOwner(int ownerId, int imageId)
         {
-            var image = db.Images.Get(imageId);
+            var image = _db.Images.Get(imageId);
             if (image == null)
                 return false;
 
@@ -116,7 +118,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public void AddImages(int albumId, int requesterId, params int[] imagesId)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
@@ -128,22 +130,22 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             foreach (var imageId in imagesId)
             {
-                if (db.AlbumImages.Any(t => t.AlbumId == albumId && t.ImageId == imageId))
+                if (_db.AlbumImages.Any(t => t.AlbumId == albumId && t.ImageId == imageId))
                     continue;
 
-                db.AlbumImages.Add(new AlbumImageEntity()
+                _db.AlbumImages.Add(new AlbumImageEntity()
                 {
                     Album = album,
                     ImageId = imageId
                 });
             }
 
-            db.Save();
+            _db.Save();
         }
 
         public void DeleteImages(int albumId, params int[] imagesId)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
@@ -151,28 +153,28 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 var albumImage = album.AlbumImages.FirstOrDefault(t => t.ImageId == imageId);
                 if (albumImage != null)
-                    db.AlbumImages.Delete(albumImage.Id);
+                    _db.AlbumImages.Delete(albumImage.Id);
             }
 
-            db.Save();
+            _db.Save();
         }
 
         public void AddMembers(int albumId, params int[] profilesId)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             foreach (var profileId in profilesId)
             {
-                var user = db.Profiles.Get(profileId);
+                var user = _db.Profiles.Get(profileId);
                 if (user == null)
                     throw new HandlingException(ExceptionType.USER_NOT_FOUND, profileId);
             }
 
             foreach (var profileId in profilesId)
             {
-                db.ProfileAlbums.Add(new()
+                _db.ProfileAlbums.Add(new()
                 {
                     ProfileId = profileId,
                     Album = album,
@@ -180,18 +182,18 @@ namespace PicoShelter_ApiServer.BLL.Services
                 });
             }
 
-            db.Save();
+            _db.Save();
         }
 
         public void DeleteMembers(int albumId, params int[] profilesId)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
             foreach (var profileId in profilesId)
             {
-                var profileAlbum = db.ProfileAlbums.FirstOrDefault(t => t.AlbumId == albumId && t.ProfileId == profileId);
+                var profileAlbum = _db.ProfileAlbums.FirstOrDefault(t => t.AlbumId == albumId && t.ProfileId == profileId);
                 if (profileAlbum == null)
                     throw new HandlingException(ExceptionType.USER_NOT_FOUND, profileId);
 
@@ -201,16 +203,16 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             foreach (var profileId in profilesId)
             {
-                var profileAlbum = db.ProfileAlbums.FirstOrDefault(t => t.AlbumId == albumId && t.ProfileId == profileId);
-                db.ProfileAlbums.Delete(profileAlbum.Id);
+                var profileAlbum = _db.ProfileAlbums.FirstOrDefault(t => t.AlbumId == albumId && t.ProfileId == profileId);
+                _db.ProfileAlbums.Delete(profileAlbum.Id);
             }
 
-            db.Save();
+            _db.Save();
         }
 
         public void ChangeRole(int albumId, int profileId, DAL.Enums.AlbumUserRole role)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
@@ -229,13 +231,13 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             profileAlbum.Role = role;
 
-            db.ProfileAlbums.Update(profileAlbum);
-            db.Save();
+            _db.ProfileAlbums.Update(profileAlbum);
+            _db.Save();
         }
 
         public DAL.Enums.AlbumUserRole? GetUserRole(int albumId, int profileId)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
@@ -245,7 +247,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public Stream GetImage(int? userId, int albumId, string imageCode, string imageExtension, out string type)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new FileNotFoundException();
 
@@ -255,7 +257,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public Stream GetThumbnail(int? userId, int albumId, string imageCode)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new FileNotFoundException();
 
@@ -265,7 +267,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public ImageInfoDto GetImageInfo(int? userId, int albumId, string imageCode)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new FileNotFoundException();
 
@@ -275,7 +277,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public AlbumInfoDto GetAlbumInfo(int albumId, int? requesterId)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album != null)
             {
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
@@ -307,7 +309,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                             .ToList()
                             .Select(t =>
                             {
-                                var profile = db.Profiles.Get(t.ProfileId);
+                                var profile = _db.Profiles.Get(t.ProfileId);
                                 return new AlbumProfileInfoDto(profile.MapToAccountInfo(), t.Role);
                             })
                             .ToList(),
@@ -322,7 +324,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? requesterId, int? starts, int? count)
         {
-            var album = db.Albums.Get(id);
+            var album = _db.Albums.Get(id);
             if (album != null)
             {
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
@@ -342,7 +344,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public PaginationResultDto<AlbumProfileInfoDto> GetUsers(int id, int? requesterId, int? starts, int? count)
         {
-            var album = db.Albums.Get(id);
+            var album = _db.Albums.Get(id);
             if (album != null)
             {
                 var validator = new AccessAlbumImageValidator() { RequesterId = requesterId, RefererAlbum = album };
@@ -356,7 +358,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                         .AsEnumerable()
                         .Select(t =>
                         {
-                            var profile = db.Profiles.Get(t.ProfileId);
+                            var profile = _db.Profiles.Get(t.ProfileId);
                             return new AlbumProfileInfoDto(profile.MapToAccountInfo(), t.Role);
                         })
                         .ToList();

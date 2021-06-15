@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PicoShelter_ApiServer.DAL.Entities
 {
-    public class AccountEntity : Entity
+    public class AccountEntity : EntityBase
     {
         public string Username { get; set; }
         public string Email { get; set; }

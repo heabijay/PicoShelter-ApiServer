@@ -12,11 +12,12 @@ namespace PicoShelter_ApiServer.BLL.Services
 {
     public class EmailService : IEmailService
     {
-        private EmailAuthDto authDto { get; set; }
-        private ILogger _logger { get; set; }
+        private readonly EmailAuthDto _authDto;
+        private readonly ILogger _logger;
+
         public EmailService(EmailAuthDto emailAuth, ILogger<IEmailService> logger)
         {
-            authDto = emailAuth;
+            _authDto = emailAuth;
             _logger = logger;
         }
 
@@ -24,7 +25,7 @@ namespace PicoShelter_ApiServer.BLL.Services
         {
             var emailMessage = new MimeMessage();
 
-            emailMessage.From.Add(authDto.from);
+            emailMessage.From.Add(_authDto.from);
             emailMessage.To.Add(new MailboxAddress(string.Empty, email));
             emailMessage.Subject = subject;
 
@@ -33,24 +34,21 @@ namespace PicoShelter_ApiServer.BLL.Services
                 Text = messageHtml
             };
 
-            using (var client = new SmtpClient())
+            using var client = new SmtpClient();
+            try
             {
-                try
-                {
-                    await client.ConnectAsync(authDto.host, authDto.port, authDto.useSsl);
-                    await client.AuthenticateAsync(authDto.username, authDto.password);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "SmtpClient Connection/Authorization Exception");
-                    throw;
-                }
-                await client.SendAsync(emailMessage);
-
-                await client.DisconnectAsync(true);
+                await client.ConnectAsync(_authDto.host, _authDto.port, _authDto.useSsl);
+                await client.AuthenticateAsync(_authDto.username, _authDto.password);
             }
-        }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SmtpClient Connection/Authorization Exception");
+                throw;
+            }
+            await client.SendAsync(emailMessage);
 
+            await client.DisconnectAsync(true);
+        }
 
         public async Task SendConfirmEmailAsync(EmailConfirmationDto dto)
         {

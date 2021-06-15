@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace PicoShelter_ApiServer.DAL.Entities
 {
-    public class ImageEntity : Entity
+    public class ImageEntity : EntityBase
     {
         public string ImageCode { get; set; }
         public string Extension { get; set; }

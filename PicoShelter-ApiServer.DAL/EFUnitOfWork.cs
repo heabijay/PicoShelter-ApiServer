@@ -8,33 +8,34 @@ namespace PicoShelter_ApiServer.DAL
 {
     public class EFUnitOfWork : IUnitOfWork
     {
-        private ApplicationContext db;
+        private readonly ApplicationContext _db;
+
         public EFUnitOfWork(string connectionString)
         {
-            db = new(connectionString);
+            _db = new(connectionString);
         }
 
-        private AccountsRepository accountRepository;
-        private AlbumImagesRepository albumImagesRepository;
-        private AlbumsRepository albumRepository;
-        private ImagesRepository imageRepository;
-        private ProfilesRepository profileRepository;
-        private ProfileAlbumsRepository profileAlbumsRepository;
-        private RolesRepository roleRepository;
-        private ConfirmationsRepository confirmationRepository;
+        private AccountsRepository _accountRepository;
+        private AlbumImagesRepository _albumImagesRepository;
+        private AlbumsRepository _albumRepository;
+        private ImagesRepository _imageRepository;
+        private ProfilesRepository _profileRepository;
+        private ProfileAlbumsRepository _profileAlbumsRepository;
+        private RolesRepository _roleRepository;
+        private ConfirmationsRepository _confirmationRepository;
 
-        public IRepository<AccountEntity> Accounts => accountRepository ??= new(db);
-        public IRepository<AlbumImageEntity> AlbumImages => albumImagesRepository ??= new(db);
-        public IRepository<AlbumEntity> Albums => albumRepository ??= new(db);
-        public IRepository<ImageEntity> Images => imageRepository ??= new(db);
-        public IRepository<ProfileEntity> Profiles => profileRepository ??= new(db);
-        public IRepository<ProfileAlbumEntity> ProfileAlbums => profileAlbumsRepository ??= new(db);
-        public IRepository<RoleEntity> Roles => roleRepository ??= new(db);
-        public IRepository<ConfirmationEntity> Confirmations => confirmationRepository ??= new(db);
+        public IRepository<AccountEntity> Accounts => _accountRepository ??= new(_db);
+        public IRepository<AlbumImageEntity> AlbumImages => _albumImagesRepository ??= new(_db);
+        public IRepository<AlbumEntity> Albums => _albumRepository ??= new(_db);
+        public IRepository<ImageEntity> Images => _imageRepository ??= new(_db);
+        public IRepository<ProfileEntity> Profiles => _profileRepository ??= new(_db);
+        public IRepository<ProfileAlbumEntity> ProfileAlbums => _profileAlbumsRepository ??= new(_db);
+        public IRepository<RoleEntity> Roles => _roleRepository ??= new(_db);
+        public IRepository<ConfirmationEntity> Confirmations => _confirmationRepository ??= new(_db);
 
         public void Save()
         {
-            db.SaveChanges();
+            _db.SaveChanges();
         }
 
         private bool disposed = false;
@@ -44,7 +45,7 @@ namespace PicoShelter_ApiServer.DAL
             {
                 if (disposing)
                 {
-                    db.Dispose();
+                    _db.Dispose();
                 }
 
                 disposed = true;

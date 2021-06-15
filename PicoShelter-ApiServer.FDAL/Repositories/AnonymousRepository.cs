@@ -6,6 +6,7 @@ namespace PicoShelter_ApiServer.FDAL.Repositories
     {
         public ImageCollection Images { get; set; }
         public ThumbnailCollection Thumbnails { get; set; }
+
         public AnonymousRepository(string endpoint)
         {
             Images = new(endpoint, null);

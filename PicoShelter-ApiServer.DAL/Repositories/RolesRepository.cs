@@ -4,7 +4,7 @@ using PicoShelter_ApiServer.DAL.Entities;
 
 namespace PicoShelter_ApiServer.DAL.Repositories
 {
-    public class RolesRepository : Repository<RoleEntity>
+    public class RolesRepository : RepositoryBase<RoleEntity>
     {
         public RolesRepository(ApplicationContext context) : base(context)
         {

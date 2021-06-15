@@ -13,17 +13,18 @@ namespace PicoShelter_ApiServer.BLL.Services
 {
     public class ConfirmationService : IConfirmationService
     {
-        IUnitOfWork db;
-        IAccountService _accountService;
-        IAlbumService _albumService;
+        private readonly IUnitOfWork _db;
+        private readonly IAccountService _accountService;
+        private readonly IAlbumService _albumService;
+
         public ConfirmationService(IUnitOfWork unit, IAccountService accountService, IAlbumService albumService)
         {
-            db = unit;
+            _db = unit;
             _accountService = accountService;
             _albumService = albumService;
         }
 
-        private ConfirmationEntity GetConfirmationEntity(string token) => db.Confirmations.FirstOrDefault(t => t.Token.Equals(token, System.StringComparison.Ordinal) && t.ValidUntilUTC >= DateTime.UtcNow);
+        private ConfirmationEntity GetConfirmationEntity(string token) => _db.Confirmations.FirstOrDefault(t => t.Token.Equals(token, System.StringComparison.Ordinal) && t.ValidUntilUTC >= DateTime.UtcNow);
 
         public ConfirmationType? GetType(int? requesterId, string token, out string data)
         {
@@ -68,7 +69,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 guid = Guid.NewGuid().ToString();
             }
-            while (db.Confirmations.Any(t => t.Token == guid && t.ValidUntilUTC >= DateTime.UtcNow));
+            while (_db.Confirmations.Any(t => t.Token == guid && t.ValidUntilUTC >= DateTime.UtcNow));
 
             return guid;
         }
@@ -84,8 +85,8 @@ namespace PicoShelter_ApiServer.BLL.Services
                 Data = data,
                 ValidUntilUTC = (timeoutInMinutes == null ? null : DateTime.UtcNow + TimeSpan.FromMinutes(timeoutInMinutes.Value)),
             };
-            db.Confirmations.Add(item);
-            db.Save();
+            _db.Confirmations.Add(item);
+            _db.Save();
 
             return token;
         }
@@ -99,14 +100,14 @@ namespace PicoShelter_ApiServer.BLL.Services
                 throw new UnauthorizedAccessException();
             }
 
-            db.Confirmations.Delete(entity.Id);
-            db.Save();
+            _db.Confirmations.Delete(entity.Id);
+            _db.Save();
         }
 
         public void Delete(int confirmId)
         {
-            db.Confirmations.Delete(confirmId);
-            db.Save();
+            _db.Confirmations.Delete(confirmId);
+            _db.Save();
         }
 
         public string CreateEmailRegistration(AccountEntity accountEntity, int timeout = 20)
@@ -224,15 +225,15 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public string CreateAlbumInvite(int albumId, int accountId, int timeout = 43200)
         {
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
 
-            var isJoined = db.ProfileAlbums.Any(t => t.ProfileId == accountId && t.AlbumId == albumId);
+            var isJoined = _db.ProfileAlbums.Any(t => t.ProfileId == accountId && t.AlbumId == albumId);
             if (isJoined)
                 throw new HandlingException(ExceptionType.USER_ALREADY_JOINED);
 
-            var isAlreadyInvited = db.Confirmations.Any(t => t.ValidUntilUTC >= DateTime.UtcNow && t.AccountId == accountId && t.Data == albumId.ToString());
+            var isAlreadyInvited = _db.Confirmations.Any(t => t.ValidUntilUTC >= DateTime.UtcNow && t.AccountId == accountId && t.Data == albumId.ToString());
             if (isAlreadyInvited)
                 throw new HandlingException(ExceptionType.USER_ALREADY_INVITED);
 
@@ -246,7 +247,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public void DeleteAlbumInvite(int albumId, int accountId)
         {
-            var invite = db.Confirmations.FirstOrDefault(t => t.ValidUntilUTC >= DateTime.UtcNow && t.AccountId == accountId && t.Data == albumId.ToString());
+            var invite = _db.Confirmations.FirstOrDefault(t => t.ValidUntilUTC >= DateTime.UtcNow && t.AccountId == accountId && t.Data == albumId.ToString());
             if (invite != null)
             {
                 Delete(invite.Id);
@@ -255,16 +256,16 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public void DeleteAllAlbumInvites(int albumId)
         {
-            var conf = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString());
+            var conf = _db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString());
             foreach (var c in conf)
-                db.Confirmations.Delete(c.Id);
+                _db.Confirmations.Delete(c.Id);
 
-            db.Save();
+            _db.Save();
         }
 
         public PaginationResultDto<UserAlbumInviteDto> GetUserAlbumInvites(int userId, int? starts, int? count)
         {
-            var confs = db.Confirmations
+            var confs = _db.Confirmations
                 .GetAll()
                 .Where(t => t.Type == ConfirmationType.AlbumInvite && t.AccountId == userId /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
 
@@ -273,7 +274,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var result = r.ToList().Select(t =>
             {
                 int albumId = Convert.ToInt32(t.Data);
-                var album = db.Albums.Get(albumId);
+                var album = _db.Albums.Get(albumId);
                 return new UserAlbumInviteDto(t.Token, album.MapToShortInfo());
             });
 
@@ -282,7 +283,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public PaginationResultDto<AccountInfoDto> GetAlbumInvites(int albumId, int? starts, int? count)
         {
-            var confs = db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString() /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
+            var confs = _db.Confirmations.Where(t => t.Type == ConfirmationType.AlbumInvite && t.Data == albumId.ToString() /*&& db.Albums.Get(Convert.ToInt32(t.Data)) != null*/);
 
             var confsR = confs.Pagination(starts, count, out int summary).ToList();
 
@@ -303,14 +304,14 @@ namespace PicoShelter_ApiServer.BLL.Services
 
             var albumId = int.Parse(dto.Data);
 
-            var album = db.Albums.Get(albumId);
+            var album = _db.Albums.Get(albumId);
             if (album == null)
             {
                 Delete(dto.Id);
                 throw new HandlingException(ExceptionType.ALBUM_NOT_FOUND);
             }
 
-            var isJoined = db.ProfileAlbums.Any(t => t.ProfileId == dto.AccountId && t.AlbumId == albumId);
+            var isJoined = _db.ProfileAlbums.Any(t => t.ProfileId == dto.AccountId && t.AlbumId == albumId);
             if (isJoined)
             {
                 Delete(dto.Id);

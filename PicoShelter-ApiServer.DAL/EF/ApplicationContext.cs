@@ -15,7 +15,7 @@ namespace PicoShelter_ApiServer.DAL.EF
         public DbSet<ConfirmationEntity> Confirmations { get; set; }
 
 
-        private string _connectionString;
+        private readonly string _connectionString;
 
         public ApplicationContext(string connectionString) : base()
         {

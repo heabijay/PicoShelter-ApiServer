@@ -2,7 +2,7 @@
 
 namespace PicoShelter_ApiServer.DAL.Entities
 {
-    public class AlbumImageEntity : Entity
+    public class AlbumImageEntity : EntityBase
     {
         public int ImageId { get; set; }
         public virtual ImageEntity Image { get; set; }

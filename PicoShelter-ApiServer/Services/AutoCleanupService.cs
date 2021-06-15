@@ -12,31 +12,32 @@ namespace PicoShelter_ApiServer.Services
 {
     public class AutoCleanupService : IHostedService, IDisposable
     {
-        ILogger<AutoCleanupService> _logger;
-        Timer timer;
-        IServiceScope scope;
+        private readonly ILogger<AutoCleanupService> _log;
+        private readonly IServiceScope _scope;
+        private Timer _timer;
+
         public AutoCleanupService(ILogger<AutoCleanupService> logger, IServiceProvider serviceProvider)
         {
-            _logger = logger;
-            scope = serviceProvider.CreateScope();
+            _log = logger;
+            _scope = serviceProvider.CreateScope();
         }
 
         public void Dispose()
         {
-            timer?.Dispose();
+            _timer?.Dispose();
         }
 
         public void DoWork(object obj)
         {
             try
             {
-                var db = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                var _imageService = scope.ServiceProvider.GetRequiredService<IImageService>();
+                var db = _scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var _imageService = _scope.ServiceProvider.GetRequiredService<IImageService>();
 
                 // Images auto-delete task
                 var now = DateTime.UtcNow;
                 var imageCodes = db.Images.Where(t => t.DeleteIn <= now).Select(t => t.ImageCode).ToList();
-                _logger.LogInformation($"Cleanup task running: {imageCodes.Count()} images to delete");
+                _log.LogInformation($"Cleanup task running: {imageCodes.Count} images to delete");
 
                 foreach (var code in imageCodes)
                 {
@@ -46,7 +47,7 @@ namespace PicoShelter_ApiServer.Services
 
                 // Delete outdated confirmations
                 var confirmationIds = db.Confirmations.Where(t => t.ValidUntilUTC < now).Select(t => t.Id).ToList();
-                _logger.LogInformation($"Cleanup task running: {confirmationIds.Count()} confirmations to delete");
+                _log.LogInformation($"Cleanup task running: {confirmationIds.Count} confirmations to delete");
 
                 foreach (var id in confirmationIds)
                 {
@@ -57,24 +58,24 @@ namespace PicoShelter_ApiServer.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception while running cleanup");
+                _log.LogError(ex, "Exception while running cleanup");
             }
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Cleanup service running.");
+            _log.LogInformation("Cleanup service running.");
 
-            timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromDays(1));
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromDays(1));
 
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Cleanup service is stopping.");
+            _log.LogInformation("Cleanup service is stopping.");
 
-            timer?.Dispose();
+            _timer?.Dispose();
 
             return Task.CompletedTask;
         }

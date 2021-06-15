@@ -30,7 +30,7 @@ namespace PicoShelter_ApiServer.FDAL.Collections
         [Obsolete("Use `CreateOrUpdate()` to create a new item", error: true)]
         public void Add(T item)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Stream CreateOrUpdate(T item)
@@ -55,13 +55,13 @@ namespace PicoShelter_ApiServer.FDAL.Collections
         [Obsolete("Method is not allowed", error: true)]
         public void CopyTo(T[] array, int arrayIndex)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         [Obsolete("Method is not allowed", error: true)]
         public IEnumerator<T> GetEnumerator()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool Remove(T item)

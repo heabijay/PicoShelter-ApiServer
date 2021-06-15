@@ -4,7 +4,7 @@ using PicoShelter_ApiServer.DAL.Entities;
 
 namespace PicoShelter_ApiServer.DAL.Repositories
 {
-    public class ConfirmationsRepository : Repository<ConfirmationEntity>
+    public class ConfirmationsRepository : RepositoryBase<ConfirmationEntity>
     {
         public ConfirmationsRepository(ApplicationContext context) : base(context)
         {

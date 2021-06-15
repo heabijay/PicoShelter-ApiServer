@@ -14,7 +14,8 @@ namespace PicoShelter_ApiServer.Controllers
     [ApiController]
     public class ImagesController : ControllerBase
     {
-        IImageService _imageService;
+        private readonly IImageService _imageService;
+
         public ImagesController(IImageService imageService)
         {
             _imageService = imageService;

@@ -4,7 +4,7 @@ using PicoShelter_ApiServer.DAL.Entities;
 
 namespace PicoShelter_ApiServer.DAL.Repositories
 {
-    public class ImagesRepository : Repository<ImageEntity>
+    public class ImagesRepository : RepositoryBase<ImageEntity>
     {
         public ImagesRepository(ApplicationContext context) : base(context)
         {

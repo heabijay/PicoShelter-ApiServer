@@ -14,8 +14,9 @@ namespace PicoShelter_ApiServer.Controllers
     [ApiController]
     public class UploadController : ControllerBase
     {
-        IImageService _imageService;
-        IAlbumService _albumService;
+        private readonly IImageService _imageService;
+        private readonly IAlbumService _albumService;
+
         public UploadController(IImageService imageService, IAlbumService albumService)
         {
             _imageService = imageService;

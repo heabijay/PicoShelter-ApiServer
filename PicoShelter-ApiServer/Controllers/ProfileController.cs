@@ -16,7 +16,8 @@ namespace PicoShelter_ApiServer.Controllers
     [Authorize]
     public class ProfileController : ControllerBase
     {
-        IProfileService _profileService;
+        private readonly IProfileService _profileService;
+
         public ProfileController(IProfileService profileService)
         {
             _profileService = profileService;

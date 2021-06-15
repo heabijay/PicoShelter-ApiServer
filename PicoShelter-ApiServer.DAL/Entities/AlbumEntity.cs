@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PicoShelter_ApiServer.DAL.Entities
 {
-    public class AlbumEntity : Entity
+    public class AlbumEntity : EntityBase
     {
         public string Code { get; set; }
         public string UserCode { get; set; }

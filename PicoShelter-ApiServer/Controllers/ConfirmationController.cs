@@ -14,10 +14,11 @@ namespace PicoShelter_ApiServer.Controllers
     [ApiController]
     public class ConfirmationController : ControllerBase
     {
-        IConfirmationService _confirmationService;
-        IEmailService _emailService;
-        IConfiguration _configuration;
-        IAccountService _accountService;
+        private readonly IConfirmationService _confirmationService;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly IAccountService _accountService;
+
         public ConfirmationController(IConfirmationService confirmationService, IEmailService emailService, IConfiguration configuration, IAccountService accountService)
         {
             _confirmationService = confirmationService;

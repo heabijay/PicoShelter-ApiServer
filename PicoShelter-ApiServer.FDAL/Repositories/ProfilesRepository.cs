@@ -6,7 +6,8 @@ namespace PicoShelter_ApiServer.FDAL.Repositories
 {
     public class ProfilesRepository
     {
-        private string _endpoint;
+        private readonly string _endpoint;
+
         public ProfilesRepository(string endpoint)
         {
             _endpoint = endpoint;

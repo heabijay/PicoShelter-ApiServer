@@ -5,7 +5,7 @@ namespace PicoShelter_ApiServer.BLL.Extensions
 {
     public static class ExceptionTypeMessage
     {
-        private static Dictionary<ExceptionType, string> ExceptionTypeMessages = new()
+        private readonly static Dictionary<ExceptionType, string> ExceptionTypeMessages = new()
         {
             {
                 ExceptionType.MODEL_NOT_VALID,

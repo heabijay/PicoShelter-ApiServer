@@ -5,8 +5,7 @@ using System.Drawing;
 
 namespace PicoShelter_ApiServer.BLL.Extensions
 {
-    public static class
-        Extensions
+    public static class Extensions
     {
         public static ImageFactory CropToThumbnail(this ImageFactory imageFactory, int maxSide)
         {
