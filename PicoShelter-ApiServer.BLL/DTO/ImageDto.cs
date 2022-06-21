@@ -6,7 +6,7 @@ namespace PicoShelter_ApiServer.BLL.DTO
     public record ImageDto(
         string title,
         int quality,
-        DateTime? deletein,
+        int? deletein,
         int? ownerProfileId,
         bool isPublic,
         Stream inputStream

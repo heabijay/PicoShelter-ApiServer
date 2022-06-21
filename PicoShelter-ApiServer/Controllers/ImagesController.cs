@@ -61,7 +61,7 @@ namespace PicoShelter_ApiServer.Controllers
                 var dto = new ImageEditDto(
                     m.title,
                     m.isChangeLifetime,
-                    m.deleteInHours == null ? null : DateTime.UtcNow + TimeSpan.FromHours(m.deleteInHours.Value),
+                    m.deleteInHours,
                     m.isPublic
                 );
 

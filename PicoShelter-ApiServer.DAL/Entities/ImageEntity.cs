@@ -10,6 +10,7 @@ namespace PicoShelter_ApiServer.DAL.Entities
         public string Extension { get; set; }
 
         public DateTime? DeleteIn { get; set; }
+        public string DeleteJobId { get; set; }
         public string Title { get; set; }
         public bool IsPublic { get; set; }
 

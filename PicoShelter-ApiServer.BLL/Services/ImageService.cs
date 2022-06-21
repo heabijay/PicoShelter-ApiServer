@@ -1,4 +1,5 @@
-﻿using ImageProcessor;
+﻿using Hangfire;
+using ImageProcessor;
 using ImageProcessor.Common.Exceptions;
 using ImageProcessor.Imaging.Formats;
 using PicoShelter_ApiServer.BLL.Bussiness_Logic;
@@ -51,7 +52,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             var imageEntity = new ImageEntity()
             {
                 Title = dto.title,
-                DeleteIn = dto.deletein,
+                DeleteIn = dto.deletein == null ? null : DateTime.UtcNow + TimeSpan.FromHours(dto.deletein.Value),
                 ProfileId = dto.ownerProfileId,
                 IsPublic = dto.isPublic,
                 Extension = factory.CurrentImageFormat.DefaultExtension
@@ -59,6 +60,10 @@ namespace PicoShelter_ApiServer.BLL.Services
             _db.Images.Add(imageEntity);
             _db.Save();
             imageEntity.ImageCode = NumberToCodeConventer.Convert(imageEntity.Id);
+
+            if (dto.deletein is not null) 
+                imageEntity.DeleteJobId = BackgroundJob.Schedule<ImageService>("images-queue", t => t.ForceDeleteImage(imageEntity.ImageCode), TimeSpan.FromHours(dto.deletein.Value));
+
             _db.Images.Update(imageEntity);
             _db.Save();
 
@@ -115,13 +120,6 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 var image = _db.Images.Get(id.Value);
 
-                // Auto Delete Check
-                if (image.DeleteIn < DateTime.UtcNow)
-                {
-                    ForceDeleteImage(code);
-                    return GetImage(code, extension, validator, out typeExtension);
-                }
-
                 var ext = extension.Replace("jpg", "jpeg", StringComparison.OrdinalIgnoreCase);
 
                 if (image.Extension.Equals(ext, StringComparison.OrdinalIgnoreCase))
@@ -160,13 +158,6 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 var image = _db.Images.Get(id.Value);
 
-                // Auto Delete Check
-                if (image.DeleteIn < DateTime.UtcNow)
-                {
-                    ForceDeleteImage(code);
-                    return GetThumbnail(code, validator);
-                }
-
                 validator.ImageEntity = image;
 
                 if (validator.Validate())
@@ -194,7 +185,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public int? GetImageIdByCode(string code)
         {
-            var image = _db.Images.FirstOrDefault(t => t.ImageCode.Equals(code, StringComparison.OrdinalIgnoreCase));
+            var image = _db.Images.FirstOrDefault(t => code.Equals(t.ImageCode, StringComparison.OrdinalIgnoreCase));
             return image?.Id;
         }
 
@@ -204,13 +195,6 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = _db.Images.Get(id.Value);
-
-                // Auto Delete Check
-                if (image.DeleteIn < DateTime.UtcNow)
-                {
-                    ForceDeleteImage(code);
-                    return GetImageInfo(code, validator);
-                }
 
                 validator.ImageEntity = image;
                 if (validator.Validate())
@@ -273,6 +257,9 @@ namespace PicoShelter_ApiServer.BLL.Services
                     filesProfile.Thumbnails.Remove(new() { Filename = image.ImageCode + ".jpeg" });
                 }
 
+                if (image.DeleteJobId is not null)
+                    BackgroundJob.Delete(image.DeleteJobId);
+
                 _db.Images.Delete(id.Value);
                 _db.Save();
                 return;
@@ -286,14 +273,6 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 var image = _db.Images.Get(id.Value);
 
-                // Auto Delete Check
-                if (image.DeleteIn < DateTime.UtcNow)
-                {
-                    ForceDeleteImage(code);
-                    EditImage(code, requesterId, dto);
-                    return;
-                }
-
                 if (image.ProfileId == requesterId)
                 {
                     image.Title = dto.title;
@@ -302,10 +281,18 @@ namespace PicoShelter_ApiServer.BLL.Services
 
                     image.IsPublic = dto.isPublic;
                     if (dto.isChangeLifetime)
-                        image.DeleteIn = dto.deletein;
+                    {
+                        image.DeleteIn = dto.deletein == null ? null : DateTime.UtcNow + TimeSpan.FromHours(dto.deletein.Value);
+                        
+                        if (image.DeleteJobId is not null)
+                            BackgroundJob.Delete(image.DeleteJobId);
+                        
+                        image.DeleteJobId = dto.deletein == null ? null : BackgroundJob.Schedule<ImageService>("images-queue", s => s.ForceDeleteImage(image.ImageCode), TimeSpan.FromHours(dto.deletein.Value));
+                    }
 
                     _db.Images.Update(image);
                     _db.Save();
+
                     return;
                 }
 

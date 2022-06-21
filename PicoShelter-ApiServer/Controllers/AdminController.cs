@@ -7,7 +7,6 @@ using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
 using PicoShelter_ApiServer.Responses.Models.Stats;
-using PicoShelter_ApiServer.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -127,25 +126,6 @@ namespace PicoShelter_ApiServer.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Forbid();
-            }
-        }
-
-        [HttpHead("forceCleanup")]
-        [HttpGet("forceCleanup")]
-        public IActionResult ForceCleanup()
-        {
-            var idStr = User?.Identity?.Name;
-            int? id = idStr == null ? null : int.Parse(idStr);
-            try
-            {
-                var logger = (ILogger<AutoCleanupService>)_serviceProvider.GetService(typeof(ILogger<AutoCleanupService>));
-                logger.LogInformation($"Admin (ID:{id}) has been requested the force cleanup.");
-                new AutoCleanupService(logger, _serviceProvider).DoWork(null);
-                return Ok();
-            }
-            catch
-            {
-                return StatusCode(500);
             }
         }
     }

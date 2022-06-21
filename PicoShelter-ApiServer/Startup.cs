@@ -1,3 +1,5 @@
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,11 +14,11 @@ using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Services;
 using PicoShelter_ApiServer.DAL;
+using PicoShelter_ApiServer.DAL.EF;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
-using PicoShelter_ApiServer.Services;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
@@ -69,6 +71,7 @@ namespace PicoShelter_ApiServer
                 )
             );
 
+            services.AddScoped<ApplicationContext>(s => new ApplicationContext(defaultConnectionString));
             services.AddScoped<IUnitOfWork>(s => new EFUnitOfWork(defaultConnectionString));
             services.AddScoped<IFileUnitOfWork>(s => new FileUnitOfWork(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FileRepository")));
             services.AddScoped<IAccountService, AccountService>();
@@ -77,8 +80,6 @@ namespace PicoShelter_ApiServer
             services.AddScoped<IAlbumService, AlbumService>();
             services.AddScoped<IEmailService>(s => new EmailService(defaultSmtpServerConfig, s.GetService<ILogger<IEmailService>>()));
             services.AddScoped<IConfirmationService, ConfirmationService>();
-
-            services.AddHostedService<AutoCleanupService>();
 
             services.AddCors();
 
@@ -115,6 +116,24 @@ namespace PicoShelter_ApiServer
                         }
                     };
                 });
+
+            services.AddHangfire(configuration => configuration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
+                {
+                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                    QueuePollInterval = TimeSpan.Zero,
+                    UseRecommendedIsolationLevel = true,
+                    DisableGlobalLocks = true
+                }));
+
+            services.AddHangfireServer(options =>
+            {
+                options.Queues = new string[] { "default", "images-queue" };
+            });
 
             services.AddControllers();
             services.AddMvc()
@@ -201,6 +220,7 @@ namespace PicoShelter_ApiServer
                 endpoints.MapDefaultControllerRoute();
             });
 
+            app.UseHangfireDashboard();
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
