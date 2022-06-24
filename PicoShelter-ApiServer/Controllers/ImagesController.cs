@@ -15,10 +15,12 @@ namespace PicoShelter_ApiServer.Controllers
     public class ImagesController : ControllerBase
     {
         private readonly IImageService _imageService;
+        private readonly IReportService _reportService;
 
-        public ImagesController(IImageService imageService)
+        public ImagesController(IImageService imageService, IReportService reportService)
         {
             _imageService = imageService;
+            _reportService = reportService;
         }
 
 
@@ -192,6 +194,26 @@ namespace PicoShelter_ApiServer.Controllers
             {
                 return Forbid();
             }
+        }
+
+
+        [HttpPost("{code}/report")]
+        public IActionResult SubmitReport(string code, [FromBody] string commentary)
+        {
+            var userIdStr = User?.Identity?.Name;
+            int? userId = userIdStr == null ? null : int.Parse(userIdStr);
+
+            if (userId is null) 
+                return Unauthorized();
+
+
+            var id = _imageService.GetImageIdByCode(code);
+            if (id is null)
+                return NotFound();
+
+            _reportService.SubmitImage(id.Value, userId.Value, commentary);
+
+            return Ok();
         }
     }
 }

@@ -87,6 +87,10 @@ namespace PicoShelter_ApiServer.BLL.Extensions
             {
                 ExceptionType.USER_ALREADY_JOINED,
                 "Selected user already joined!"
+            },
+            {
+                ExceptionType.REPORT_ALREADY_PROCESSED,
+                "Selected report was already processed!"
             }
         };
 

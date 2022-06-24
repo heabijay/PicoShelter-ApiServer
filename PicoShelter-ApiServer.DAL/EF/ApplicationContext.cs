@@ -13,6 +13,7 @@ namespace PicoShelter_ApiServer.DAL.EF
         public DbSet<ProfileAlbumEntity> ProfileAlbums { get; set; }
         public DbSet<AlbumImageEntity> AlbumImages { get; set; }
         public DbSet<ConfirmationEntity> Confirmations { get; set; }
+        public DbSet<ReportEntity> Reports { get; set; }
 
 
         private readonly string _connectionString;
@@ -75,6 +76,21 @@ namespace PicoShelter_ApiServer.DAL.EF
             builder.Entity<AccountEntity>()
                 .Property(t => t.RoleId)
                 .HasDefaultValue(1);
+
+            builder.Entity<ReportEntity>()
+                .HasOne(t => t.Image)
+                .WithMany(t => t.Reports)
+                .HasForeignKey(t => t.ImageId);
+
+            builder.Entity<ReportEntity>()
+                .HasOne(t => t.Author)
+                .WithMany(t => t.Reports)
+                .HasForeignKey(t => t.AuthorId);
+
+            builder.Entity<ReportEntity>()
+                .HasOne(t => t.ProcessedBy)
+                .WithMany(t => t.ReportsProcessed)
+                .HasForeignKey(t => t.ProcessedById);
         }
     }
 }

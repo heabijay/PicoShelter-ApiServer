@@ -80,6 +80,7 @@ namespace PicoShelter_ApiServer
             services.AddScoped<IAlbumService, AlbumService>();
             services.AddScoped<IEmailService>(s => new EmailService(defaultSmtpServerConfig, s.GetService<ILogger<IEmailService>>()));
             services.AddScoped<IConfirmationService, ConfirmationService>();
+            services.AddScoped<IReportService, ReportService>();
 
             services.AddCors();
 
@@ -132,7 +133,7 @@ namespace PicoShelter_ApiServer
 
             services.AddHangfireServer(options =>
             {
-                options.Queues = new string[] { "default", "images-queue" };
+                options.Queues = new string[] { "default", "confirmations-queue", "images-queue" };
             });
 
             services.AddControllers();

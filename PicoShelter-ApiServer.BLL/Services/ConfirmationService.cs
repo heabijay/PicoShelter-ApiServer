@@ -6,6 +6,7 @@ using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Enums;
 using PicoShelter_ApiServer.DAL.Interfaces;
+using PicoShelter_ApiServer.DAL.Repositories;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -90,7 +91,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             _db.Save();
 
             if (timeoutInMinutes is not null)
-                BackgroundJob.Schedule<IUnitOfWork>(t => t.Confirmations.Delete(item.Id), TimeSpan.FromMinutes(timeoutInMinutes.Value));
+                BackgroundJob.Schedule<ConfirmationsRepository>("confirmations-queue", t => t.Delete(item.Id), TimeSpan.FromMinutes(timeoutInMinutes.Value));
 
             return token;
         }
