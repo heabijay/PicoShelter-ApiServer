@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Interfaces;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PicoShelter_ApiServer.DAL.Entities;
+using System;
 
 namespace PicoShelter_ApiServer.DAL.EF
 {
@@ -21,6 +22,7 @@ namespace PicoShelter_ApiServer.DAL.EF
         public ApplicationContext(string connectionString) : base()
         {
             _connectionString = connectionString;
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
         }
 
@@ -42,6 +44,28 @@ namespace PicoShelter_ApiServer.DAL.EF
             RoleEntity adminRole = new() { Id = 2, Name = "admin" };
 
             builder.Entity<RoleEntity>().HasData(userRole, adminRole);
+
+
+            AccountEntity adminAccount = new()
+            {
+                Id = 1,
+                Email = "heabijay@gmail.com",
+                Username = "heabijay",
+                Password = "$PICOSHELTER$V1$10000$fplVDwM5wZprgIYyiPuF8EPf3H4t52TDCKjK90NkbSDEBaFa",
+                RoleId = 2,
+                LastCredentialsChange = DateTime.Today,
+            };
+
+            ProfileEntity adminProfile = new()
+            {
+                Firstname = "Denys",
+                Lastname = "Lesyshak",
+                AccountId = 1
+            };
+
+            builder.Entity<AccountEntity>().HasData(adminAccount);
+            builder.Entity<ProfileEntity>().HasData(adminProfile);
+
 
             builder.Entity<ProfileAlbumEntity>()
                 .HasOne(t => t.Profile)
