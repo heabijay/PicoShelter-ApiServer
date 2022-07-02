@@ -2,6 +2,7 @@
 {
     public record ProfileNameDto(
         string firstname,
-        string lastname
+        string lastname,
+        string backgroundCss
     );
 }

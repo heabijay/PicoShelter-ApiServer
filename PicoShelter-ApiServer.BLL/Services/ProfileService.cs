@@ -37,6 +37,23 @@ namespace PicoShelter_ApiServer.BLL.Services
             _db.Save();
         }
 
+        public void EditBackgroundCss(int id, string backgroundCssBody)
+        {
+            var profile = _db.Profiles.Get(id);
+            profile.BackgroundCSS = PreventCssInjection(backgroundCssBody);
+            _db.Profiles.Update(profile);
+            _db.Save();
+        }
+
+        private static string PreventCssInjection(string css)
+        {
+            var i = css.IndexOfAny(new char[] { '}', '{', ';' });
+            if (i >= 0)
+                return css.Substring(0, i);
+
+            return css;
+        }
+
         public Stream GetAvatar(int id)
         {
             var profile = _files.Profiles.GetOrCreate(id);

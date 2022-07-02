@@ -30,7 +30,8 @@ namespace PicoShelter_ApiServer.BLL.Extensions
                 t.Username,
                 t.Profile == null ? null : new ProfileNameDto(
                     t.Profile?.Firstname,
-                    t.Profile?.Lastname
+                    t.Profile?.Lastname,
+                    t.Profile?.BackgroundCSS
                 ),
                 t.Role?.Name
             );
