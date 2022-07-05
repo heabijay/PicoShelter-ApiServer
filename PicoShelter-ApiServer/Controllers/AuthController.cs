@@ -197,7 +197,15 @@ namespace PicoShelter_ApiServer.Controllers
         #region Authorization Logic
         private IActionResult GetToken(string username, string password)
         {
-            var identity = GetIdentity(username, password);
+            ClaimsIdentity identity;
+            try
+            {
+                identity = GetIdentity(username, password);
+            }
+            catch (HandlingException ex)
+            {
+                return new ErrorResponse(ex);
+            }
 
             if (identity == null)
                 return new ErrorResponse(ExceptionType.CREDENTIALS_INCORRECT);

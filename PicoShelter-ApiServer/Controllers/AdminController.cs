@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Interfaces;
@@ -21,13 +22,15 @@ namespace PicoShelter_ApiServer.Controllers
         private readonly IUnitOfWork _db;
         private readonly IImageService _imageService;
         private readonly IReportService _reportService;
+        private readonly IProfileService _profileService;
         private readonly IServiceProvider _serviceProvider;
 
-        public AdminController(IUnitOfWork unit, IImageService imageService, IReportService reportService, IServiceProvider serviceProvider)
+        public AdminController(IUnitOfWork unit, IImageService imageService, IReportService reportService, IProfileService profileService, IServiceProvider serviceProvider)
         {
             _db = unit;
             _imageService = imageService;
             _reportService = reportService;
+            _profileService = profileService;
             _serviceProvider = serviceProvider;
         }
 
@@ -152,6 +155,24 @@ namespace PicoShelter_ApiServer.Controllers
             int? authId = idStr == null ? null : int.Parse(idStr);
 
             _reportService.MarkReportsAsProcessed(imageId, authId.Value);
+
+            return Ok();
+        }
+
+        [HttpPost("ban/{userId}")]
+        public IActionResult BanUser(int userId, [FromQuery] DateTime untilDate, [FromBody] string comment)
+        {
+            string idStr = User?.Identity?.Name;
+            int? authId = idStr == null ? null : int.Parse(idStr);
+
+            try
+            {
+                _profileService.AddBan(userId, untilDate, comment, authId.Value);
+            }
+            catch (HandlingException ex)
+            {
+                return new ErrorResponse(ex);
+            }
 
             return Ok();
         }

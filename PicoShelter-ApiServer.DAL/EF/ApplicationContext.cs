@@ -15,6 +15,7 @@ namespace PicoShelter_ApiServer.DAL.EF
         public DbSet<AlbumImageEntity> AlbumImages { get; set; }
         public DbSet<ConfirmationEntity> Confirmations { get; set; }
         public DbSet<ReportEntity> Reports { get; set; }
+        public DbSet<BanEntity> Bans { get; set; }
 
 
         private readonly string _connectionString;
@@ -115,6 +116,18 @@ namespace PicoShelter_ApiServer.DAL.EF
                 .HasOne(t => t.ProcessedBy)
                 .WithMany(t => t.ReportsProcessed)
                 .HasForeignKey(t => t.ProcessedById);
+
+            builder.Entity<BanEntity>()
+                .HasOne(t => t.User)
+                .WithMany(t => t.Bans)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<BanEntity>()
+                .HasOne(t => t.Admin)
+                .WithMany(t => t.BansProcessed)
+                .HasForeignKey(t => t.AdminId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

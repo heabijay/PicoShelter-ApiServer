@@ -1,4 +1,5 @@
 ﻿using PicoShelter_ApiServer.BLL.DTO;
+using System;
 using System.IO;
 
 namespace PicoShelter_ApiServer.BLL.Interfaces
@@ -14,5 +15,6 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public ProfileInfoDto GetProfileInfo(int id, bool adminData = false);
         public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? starts, int? count, bool adminData = false);
         public PaginationResultDto<AlbumShortInfoDto> GetAlbums(int id, int? starts, int? count, bool adminData = false);
+        public void AddBan(int toId, DateTime until, string comment, int fromId);
     }
 }

@@ -22,6 +22,7 @@ namespace PicoShelter_ApiServer.DAL.Entities
         public virtual List<ProfileAlbumEntity> ProfileAlbums { get; set; }
         public virtual List<ReportEntity> Reports { get; set; }
         public virtual List<ReportEntity> ReportsProcessed { get; set; }
+        public virtual List<BanEntity> BansProcessed { get; set; }
 
         public ProfileEntity()
         {

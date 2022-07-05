@@ -18,5 +18,6 @@ namespace PicoShelter_ApiServer.DAL.Entities
         public virtual ProfileEntity Profile { get; set; }
 
         public virtual List<ConfirmationEntity> Confirmations { get; set; }
+        public virtual List<BanEntity> Bans { get; set; }
     }
 }

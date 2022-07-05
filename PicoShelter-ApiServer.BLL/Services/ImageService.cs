@@ -7,6 +7,7 @@ using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
+using PicoShelter_ApiServer.BLL.Statics;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Collections;
@@ -119,6 +120,8 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = _db.Images.Get(id.Value);
+                if (image.ProfileId is not null)
+                    UserBanChecker.ThrowIfUserBanned(_db, image.ProfileId.Value);
 
                 var ext = extension.Replace("jpg", "jpeg", StringComparison.OrdinalIgnoreCase);
 
@@ -157,6 +160,8 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = _db.Images.Get(id.Value);
+                if (image.ProfileId is not null)
+                    UserBanChecker.ThrowIfUserBanned(_db, image.ProfileId.Value);
 
                 validator.ImageEntity = image;
 
@@ -195,6 +200,8 @@ namespace PicoShelter_ApiServer.BLL.Services
             if (id != null)
             {
                 var image = _db.Images.Get(id.Value);
+                if (image.ProfileId is not null)
+                    UserBanChecker.ThrowIfUserBanned(_db, image.ProfileId.Value);
 
                 validator.ImageEntity = image;
                 if (validator.Validate())
