@@ -26,6 +26,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using PicoShelter_ApiServer.Hubs;
 
 namespace PicoShelter_ApiServer
 {
@@ -81,6 +82,7 @@ namespace PicoShelter_ApiServer
             services.AddScoped<IEmailService>(s => new EmailService(defaultSmtpServerConfig, s.GetService<ILogger<IEmailService>>()));
             services.AddScoped<IConfirmationService, ConfirmationService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddSingleton<ICommentNotifier, CommentHub>();
 
             services.AddCors();
 
@@ -148,6 +150,8 @@ namespace PicoShelter_ApiServer
                     };
                 }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
+            services.AddSignalR();
+
             services.AddSwaggerGen(options =>
             {
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -199,18 +203,27 @@ namespace PicoShelter_ApiServer
                 app.UseDeveloperExceptionPage();
             }
             //app.UseDeveloperExceptionPage();
-
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-
+            
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<CommentHub>("/live-comments")
+                    .AllowAnonymous()
+                    .RequireCors(cors =>
+                    {
+                        cors.AllowAnyHeader();
+                        cors.AllowAnyOrigin();
+                        cors.AllowAnyMethod();
+                    });
+                
                 endpoints.Map("/", context =>
                 {
                     var url = app.ApplicationServices.GetService<IConfiguration>().GetSection("WebApp").GetSection("Default").GetValue<string>("HomeUrl");

@@ -25,5 +25,10 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public void ForceDeleteImage(string code);
         public void EditImage(string code, int requesterId, ImageEditDto dto);
         public void ChangeIsPublicImage(string code, int requesterId, bool isPublic);
+
+        // Comments
+        void AddComment(string code, IValidator validator, int userId, string comment);
+        void DeleteComment(int commentId, int userId);
+        PaginationResultDto<ImageCommentDto> GetComments(string code, IValidator validator, int? starts, int? count);
     }
 }

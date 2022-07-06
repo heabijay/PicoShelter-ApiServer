@@ -54,7 +54,7 @@ namespace PicoShelter_ApiServer.DAL.EF
                 Username = "heabijay",
                 Password = "$PICOSHELTER$V1$10000$fplVDwM5wZprgIYyiPuF8EPf3H4t52TDCKjK90NkbSDEBaFa",
                 RoleId = 2,
-                LastCredentialsChange = DateTime.Today,
+                LastCredentialsChange = DateTime.Today.ToUniversalTime(),
             };
 
             ProfileEntity adminProfile = new()
@@ -127,6 +127,18 @@ namespace PicoShelter_ApiServer.DAL.EF
                 .HasOne(t => t.Admin)
                 .WithMany(t => t.BansProcessed)
                 .HasForeignKey(t => t.AdminId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ImageEntity>()
+                .HasMany(t => t.Comments)
+                .WithOne(t => t.Image)
+                .HasForeignKey(t => t.ImageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ImageCommentEntity>()
+                .HasOne(t => t.Author)
+                .WithMany(t => t.ImageComments)
+                .HasForeignKey(t => t.AuthorId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

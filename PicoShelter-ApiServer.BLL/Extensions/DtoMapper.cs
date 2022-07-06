@@ -41,5 +41,9 @@ namespace PicoShelter_ApiServer.BLL.Extensions
         {
             return t.Account.MapToAccountInfo();
         }
+
+
+        public static ImageCommentDto MapToImageCommentInfo(this ImageCommentEntity t)
+            => new ImageCommentDto(t.Id, t.Text, t.CreatedDateUTC, t.Author.MapToAccountInfo());
     }
 }

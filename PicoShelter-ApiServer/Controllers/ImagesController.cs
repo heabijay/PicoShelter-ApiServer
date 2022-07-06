@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
@@ -212,6 +213,78 @@ namespace PicoShelter_ApiServer.Controllers
                 return NotFound();
 
             _reportService.SubmitImage(id.Value, userId.Value, commentary);
+
+            return Ok();
+        }
+
+
+        [HttpPost("{code}/comment")]
+        public IActionResult AddComment(string code, [FromBody] string commentary)
+        {
+            var userIdStr = User?.Identity?.Name;
+            int? userId = userIdStr == null ? null : int.Parse(userIdStr);
+
+            if (userId is null)
+                return Unauthorized();
+
+
+            var id = _imageService.GetImageIdByCode(code);
+            if (id is null)
+                return NotFound();
+
+            try
+            {
+                _imageService.AddComment(code, new AccessWithPublicEndpointImageValidator() { RequesterId = userId }, userId.Value, commentary);
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+
+            return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpHead("{code}/comments")]
+        [HttpGet("{code}/comments")]
+        public IActionResult GetComments([FromRoute] string code, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            try
+            {
+                var result = _imageService.GetComments(code, new AccessWithPublicEndpointImageValidator(), starts, count);
+                return new SuccessResponse(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+        }
+
+        [HttpDelete("{code}/comment/{commentId}")]
+        public IActionResult DeleteComment(string code, int commentId)
+        {
+            var userIdStr = User?.Identity?.Name;
+            int? userId = userIdStr == null ? null : int.Parse(userIdStr);
+
+            if (userId is null)
+                return Unauthorized();
+
+            var id = _imageService.GetImageIdByCode(code);
+            if (id is null)
+                return NotFound();
+
+            try
+            {
+                _imageService.DeleteComment(commentId, userId.Value);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
 
             return Ok();
         }

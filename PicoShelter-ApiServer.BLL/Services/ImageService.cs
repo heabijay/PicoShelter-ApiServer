@@ -15,6 +15,7 @@ using PicoShelter_ApiServer.FDAL.Interfaces;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 
 namespace PicoShelter_ApiServer.BLL.Services
 {
@@ -23,12 +24,14 @@ namespace PicoShelter_ApiServer.BLL.Services
         private readonly IUnitOfWork _db;
         private readonly IFileUnitOfWork _files;
         private readonly IAccountService _accountService;
+        private readonly ICommentNotifier _commentNotifier;
 
-        public ImageService(IUnitOfWork unit, IFileUnitOfWork funit, IAccountService accountService)
+        public ImageService(IUnitOfWork unit, IFileUnitOfWork funit, IAccountService accountService, ICommentNotifier commentNotifier)
         {
             _db = unit;
             _files = funit;
             _accountService = accountService;
+            _commentNotifier = commentNotifier;
         }
 
         public string AddImage(ImageDto dto)
@@ -328,6 +331,82 @@ namespace PicoShelter_ApiServer.BLL.Services
             }
 
             throw new FileNotFoundException();
+        }
+
+
+
+        // Comments section
+
+        public void AddComment(string code, IValidator validator, int userId, string comment)
+        {
+            var id = GetImageIdByCode(code);
+            if (id != null)
+            {
+                var image = _db.Images.Get(id.Value);
+                if (image.ProfileId is not null)
+                    UserBanChecker.ThrowIfUserBanned(_db, image.ProfileId.Value);
+
+                validator.ImageEntity = image;
+                if (validator.Validate())
+                {
+                    var commentEntity = new ImageCommentEntity()
+                    {
+                        AuthorId = userId,
+                        ImageId = id.Value,
+                        Text = comment
+                    };
+                    
+                    _db.ImageComments.Add(commentEntity);
+                    _db.Save();
+
+                    _commentNotifier.OnCommentAddedAsync(NumberToCodeConventer.Convert(commentEntity.ImageId));
+                    return;
+                }
+
+                throw new UnauthorizedAccessException();
+            }
+
+            throw new FileNotFoundException();
+        }
+
+        public void DeleteComment(int commentId, int userId)
+        {
+            var comment = _db.ImageComments.Get(commentId);
+            if (comment is not null)
+            {
+                if (comment.AuthorId == userId)
+                {
+                    _db.ImageComments.Delete(commentId);
+                    _db.Save();
+
+                    _commentNotifier.OnCommentDeletedAsync(NumberToCodeConventer.Convert(comment.ImageId), commentId);
+                }
+                else throw new UnauthorizedAccessException();
+            }
+        }
+
+        public PaginationResultDto<ImageCommentDto> GetComments(string code, IValidator validator, int? starts, int? count)
+        {
+            var id = GetImageIdByCode(code);
+            if (id != null)
+            {
+                var image = _db.Images.Get(id.Value);
+                validator.ImageEntity = image;
+                if (!validator.Validate())
+                    throw new UnauthorizedAccessException();
+
+                if (image != null)
+                {
+                    var comments = image.Comments.AsQueryable();
+                    var listComments = comments.Reverse().Pagination(starts, count, out int summary);
+                    var resultImages = listComments.ToList();
+
+                    var dtos = resultImages.Select(t => t.MapToImageCommentInfo()).ToList();
+                    return new PaginationResultDto<ImageCommentDto>(dtos, summary);
+                }
+            }
+
+            return null;
         }
     }
 }
