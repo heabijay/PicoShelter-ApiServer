@@ -216,6 +216,65 @@ namespace PicoShelter_ApiServer.Controllers
 
             return Ok();
         }
+        
+        [HttpPost("{code}/setLike")]
+        public IActionResult SetLike(string code)
+        {
+            var userIdStr = User?.Identity?.Name;
+            int? userId = userIdStr == null ? null : int.Parse(userIdStr);
+
+            if (userId is null)
+                return Unauthorized();
+
+
+            var id = _imageService.GetImageIdByCode(code);
+            if (id is null)
+                return NotFound();
+
+            try
+            {
+                _imageService.SetLike(code, new AccessWithPublicEndpointImageValidator() { RequesterId = userId }, userId.Value);
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+
+            return Ok();
+        }
+        
+        [HttpDelete("{code}/undoLike")]
+        public IActionResult UndoLike(string code)
+        {
+            var userIdStr = User?.Identity?.Name;
+            int? userId = userIdStr == null ? null : int.Parse(userIdStr);
+
+            if (userId is null)
+                return Unauthorized();
+
+            var id = _imageService.GetImageIdByCode(code);
+            if (id is null)
+                return NotFound();
+
+            try
+            {
+                _imageService.UndoLike(code, new AccessWithPublicEndpointImageValidator() { RequesterId = userId }, userId.Value);
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+
+            return Ok();
+        }
 
 
         [HttpPost("{code}/comment")]

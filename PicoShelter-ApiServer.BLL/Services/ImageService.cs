@@ -221,7 +221,10 @@ namespace PicoShelter_ApiServer.BLL.Services
                         image.IsPublic,
                         userDto,
                         image.CreatedDateUTC,
-                        image.DeleteIn
+                        image.DeleteIn,
+                        image.Likes?.Count ?? 0,
+                        validator.RequesterId != null 
+                            && (image.Likes?.Any(x => x.ProfileId == validator.RequesterId) ?? false)
                     );
                 }
 
@@ -335,6 +338,75 @@ namespace PicoShelter_ApiServer.BLL.Services
 
 
 
+        // Like section
+        
+        public void SetLike(string code, IValidator validator, int userId)
+        {
+            var id = GetImageIdByCode(code);
+            if (id != null)
+            {
+                var image = _db.Images.Get(id.Value);
+                if (image.ProfileId is not null)
+                    UserBanChecker.ThrowIfUserBanned(_db, image.ProfileId.Value);
+
+                validator.ImageEntity = image;
+                if (validator.Validate())
+                {
+                    var isImageAlreadyLikeIt = _db.ImageLikes
+                        .Any(x => x.ImageId == id.Value
+                            && x.ProfileId == userId);
+
+                    if (isImageAlreadyLikeIt)
+                        return;
+                    
+                    _db.ImageLikes.Add(new()
+                    {
+                        ProfileId = userId,
+                        ImageId = id.Value,
+                    });
+                    
+                    _db.Save();
+                    
+                    return;
+                }
+
+                throw new UnauthorizedAccessException();
+            }
+
+            throw new FileNotFoundException();
+        }
+        
+        public void UndoLike(string code, IValidator validator, int userId)
+        {
+            var id = GetImageIdByCode(code);
+            if (id != null)
+            {
+                var image = _db.Images.Get(id.Value);
+                if (image.ProfileId is not null)
+                    UserBanChecker.ThrowIfUserBanned(_db, image.ProfileId.Value);
+
+                validator.ImageEntity = image;
+                if (validator.Validate())
+                {
+                    var imageLike = _db.ImageLikes
+                        .FirstOrDefault(x => x.ImageId == id.Value
+                                  && x.ProfileId == userId);
+
+                    if (imageLike == null)
+                        return;
+                    
+                    _db.ImageLikes.Delete(imageLike.Id);
+                    _db.Save();
+                    return;
+                }
+
+                throw new UnauthorizedAccessException();
+            }
+
+            throw new FileNotFoundException();
+        }
+        
+        
         // Comments section
 
         public void AddComment(string code, IValidator validator, int userId, string comment)

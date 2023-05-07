@@ -26,6 +26,10 @@ namespace PicoShelter_ApiServer.BLL.Interfaces
         public void EditImage(string code, int requesterId, ImageEditDto dto);
         public void ChangeIsPublicImage(string code, int requesterId, bool isPublic);
 
+        // Likes
+        void SetLike(string code, IValidator validator, int userId);
+        void UndoLike(string code, IValidator validator, int userId);
+        
         // Comments
         void AddComment(string code, IValidator validator, int userId, string comment);
         void DeleteComment(int commentId, int userId);

@@ -10,6 +10,8 @@ namespace PicoShelter_ApiServer.BLL.DTO
         bool isPublic,
         AccountInfoDto user,
         DateTime uploadedTime,
-        DateTime? autoDeleteIn
+        DateTime? autoDeleteIn,
+        int likes,
+        bool youLikeIt
     );
 }

@@ -140,6 +140,12 @@ namespace PicoShelter_ApiServer.DAL.EF
                 .WithMany(t => t.ImageComments)
                 .HasForeignKey(t => t.AuthorId)
                 .OnDelete(DeleteBehavior.NoAction);
+            
+            builder.Entity<ImageLikeEntity>()
+                .HasOne(t => t.Image)
+                .WithMany(t => t.Likes)
+                .HasForeignKey(t => t.ImageId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

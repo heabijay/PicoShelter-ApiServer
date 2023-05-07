@@ -18,6 +18,8 @@ namespace PicoShelter_ApiServer.DAL.Entities
         public virtual ProfileEntity Profile { get; set; }
 
         public virtual List<ImageCommentEntity> Comments { get; set; }
+        
+        public virtual List<ImageLikeEntity> Likes { get; set; }
         public virtual List<AlbumImageEntity> AlbumImages { get; set; }
         public virtual List<ReportEntity> Reports { get; set; }
 
