@@ -91,7 +91,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             _db.Save();
 
             if (timeoutInMinutes is not null)
-                BackgroundJob.Schedule<ConfirmationsRepository>("confirmations-queue", t => t.Delete(item.Id), TimeSpan.FromMinutes(timeoutInMinutes.Value));
+                BackgroundJob.Schedule<ConfirmationsRepository>(t => t.Delete(item.Id), TimeSpan.FromMinutes(timeoutInMinutes.Value));
 
             return token;
         }

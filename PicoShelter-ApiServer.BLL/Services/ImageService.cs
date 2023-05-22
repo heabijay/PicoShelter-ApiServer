@@ -66,7 +66,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             imageEntity.ImageCode = NumberToCodeConventer.Convert(imageEntity.Id);
 
             if (dto.deletein is not null) 
-                imageEntity.DeleteJobId = BackgroundJob.Schedule<ImageService>("images-queue", t => t.ForceDeleteImage(imageEntity.ImageCode), TimeSpan.FromHours(dto.deletein.Value));
+                imageEntity.DeleteJobId = BackgroundJob.Schedule<ImageService>(t => t.ForceDeleteImage(imageEntity.ImageCode), TimeSpan.FromHours(dto.deletein.Value));
 
             _db.Images.Update(imageEntity);
             _db.Save();
@@ -300,7 +300,7 @@ namespace PicoShelter_ApiServer.BLL.Services
                         if (image.DeleteJobId is not null)
                             BackgroundJob.Delete(image.DeleteJobId);
                         
-                        image.DeleteJobId = dto.deletein == null ? null : BackgroundJob.Schedule<ImageService>("images-queue", s => s.ForceDeleteImage(image.ImageCode), TimeSpan.FromHours(dto.deletein.Value));
+                        image.DeleteJobId = dto.deletein == null ? null : BackgroundJob.Schedule<ImageService>(s => s.ForceDeleteImage(image.ImageCode), TimeSpan.FromHours(dto.deletein.Value));
                     }
 
                     _db.Images.Update(image);

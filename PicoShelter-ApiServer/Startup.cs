@@ -26,6 +26,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Transactions;
+using Hangfire.MySql;
 using PicoShelter_ApiServer.Hubs;
 
 namespace PicoShelter_ApiServer
@@ -44,11 +46,12 @@ namespace PicoShelter_ApiServer
         {
             var connectionStrings = Configuration.GetSection("ConnectionStrings");
             var defaultConnectionString = connectionStrings.GetValue<string>("DefaultConnection");
+            var isMySql = defaultConnectionString.StartsWith("EnvironmentVariableMySQL=", StringComparison.OrdinalIgnoreCase);
             if (defaultConnectionString.StartsWith("EnvironmentVariable=", StringComparison.OrdinalIgnoreCase))
             {
                 defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnvironmentVariable=", "", StringComparison.OrdinalIgnoreCase));
             }
-            else if (defaultConnectionString.StartsWith("EnvironmentVariableMySQL=", StringComparison.OrdinalIgnoreCase))
+            else if (isMySql)
             {
                 defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnvironmentVariableMySQL=", "", StringComparison.OrdinalIgnoreCase));
                 if (defaultConnectionString != null)
@@ -124,19 +127,28 @@ namespace PicoShelter_ApiServer
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseSqlServerStorage(Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
-                {
-                    CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
-                    SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-                    QueuePollInterval = TimeSpan.Zero,
-                    UseRecommendedIsolationLevel = true,
-                    DisableGlobalLocks = true
-                }));
+                .UseStorage<JobStorage>(isMySql
+                    ? new MySqlStorage(defaultConnectionString, new MySqlStorageOptions()
+                    {
+                        TransactionIsolationLevel = IsolationLevel.ReadCommitted,
+                        QueuePollInterval = TimeSpan.FromSeconds(15),
+                        JobExpirationCheckInterval = TimeSpan.FromHours(1),
+                        CountersAggregateInterval = TimeSpan.FromMinutes(5),
+                        PrepareSchemaIfNecessary = true,
+                        DashboardJobListLimit = 50000,
+                        TransactionTimeout = TimeSpan.FromMinutes(1),
+                        TablesPrefix = "Hangfire"
+                    })
+                    : new SqlServerStorage(defaultConnectionString, new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true
+                    })));
 
-            services.AddHangfireServer(options =>
-            {
-                options.Queues = new string[] { "default", "confirmations-queue", "images-queue" };
-            });
+            services.AddHangfireServer();
 
             services.AddControllers();
             services.AddMvc()
