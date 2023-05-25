@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Hangfire.MySql;
 using PicoShelter_ApiServer.Hubs;
+using Microsoft.EntityFrameworkCore;
 
 namespace PicoShelter_ApiServer
 {
@@ -210,6 +211,13 @@ namespace PicoShelter_ApiServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+
+                db.Database.Migrate();
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

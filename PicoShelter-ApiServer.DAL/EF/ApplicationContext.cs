@@ -24,7 +24,7 @@ namespace PicoShelter_ApiServer.DAL.EF
         {
             _connectionString = connectionString;
             //Database.EnsureDeleted();
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
