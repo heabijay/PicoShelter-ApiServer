@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <Compile Remove="AuthOptions.Example.cs" />
-    <Compile Remove="Startup — копия.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -216,6 +216,8 @@ namespace PicoShelter_ApiServer
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
 
                 db.Database.Migrate();
+                db.Images.RemoveRange(db.Images.Where(x => x.ImageCode == null));
+                db.SaveChanges();
             }
 
             if (env.IsDevelopment())
