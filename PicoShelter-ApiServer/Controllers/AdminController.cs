@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Validators;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
 using PicoShelter_ApiServer.Responses.Models;
 using PicoShelter_ApiServer.Responses.Models.Stats;
-using PicoShelter_ApiServer.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -22,12 +21,16 @@ namespace PicoShelter_ApiServer.Controllers
     {
         private readonly IUnitOfWork _db;
         private readonly IImageService _imageService;
+        private readonly IReportService _reportService;
+        private readonly IProfileService _profileService;
         private readonly IServiceProvider _serviceProvider;
 
-        public AdminController(IUnitOfWork unit, IImageService imageService, IServiceProvider serviceProvider)
+        public AdminController(IUnitOfWork unit, IImageService imageService, IReportService reportService, IProfileService profileService, IServiceProvider serviceProvider)
         {
             _db = unit;
             _imageService = imageService;
+            _reportService = reportService;
+            _profileService = profileService;
             _serviceProvider = serviceProvider;
         }
 
@@ -67,7 +70,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             try
             {
-                var info = _imageService.GetImageInfo(code, new AccessWithPublicEndpointImageValidator());
+                var info = _imageService.GetImageInfo(code, new CollectedAnyValidator(new AccessWithPublicEndpointImageValidator(), new AccessReportedImageValidator()));
                 return new SuccessResponse(info);
             }
             catch (FileNotFoundException)
@@ -90,7 +93,7 @@ namespace PicoShelter_ApiServer.Controllers
         {
             try
             {
-                var stream = _imageService.GetImage(code, extension, new AccessWithPublicEndpointImageValidator(), out string type);
+                var stream = _imageService.GetImage(code, extension, new CollectedAnyValidator(new AccessWithPublicEndpointImageValidator(), new AccessReportedImageValidator()), out string type);
                 return File(stream, "image/" + type);
             }
             catch (FileNotFoundException)
@@ -130,23 +133,48 @@ namespace PicoShelter_ApiServer.Controllers
             }
         }
 
-        [HttpHead("forceCleanup")]
-        [HttpGet("forceCleanup")]
-        public IActionResult ForceCleanup()
+
+        [HttpHead("reports")]
+        [HttpGet("reports")]
+        public IActionResult GetReports([FromQuery] int? starts, [FromQuery] int? count)
         {
-            var idStr = User?.Identity?.Name;
-            int? id = idStr == null ? null : int.Parse(idStr);
+            return new SuccessResponse(_reportService.GetReportedImages(starts, count));
+        }
+
+        [HttpHead("report/{imageId}")]
+        [HttpGet("report/{imageId}")]
+        public IActionResult GetReportMessages(int imageId, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            return new SuccessResponse(_reportService.GetReportsByImage(imageId, starts, count));
+        }
+
+        [HttpPost("report/{imageId}/process")]
+        public IActionResult PostReportProcessed(int imageId, [FromQuery] int? starts, [FromQuery] int? count)
+        {
+            string idStr = User?.Identity?.Name;
+            int? authId = idStr == null ? null : int.Parse(idStr);
+
+            _reportService.MarkReportsAsProcessed(imageId, authId.Value);
+
+            return Ok();
+        }
+
+        [HttpPost("ban/{userId}")]
+        public IActionResult BanUser(int userId, [FromQuery] DateTime untilDate, [FromBody] string comment)
+        {
+            string idStr = User?.Identity?.Name;
+            int? authId = idStr == null ? null : int.Parse(idStr);
+
             try
             {
-                var logger = (ILogger<AutoCleanupService>)_serviceProvider.GetService(typeof(ILogger<AutoCleanupService>));
-                logger.LogInformation($"Admin (ID:{id}) has been requested the force cleanup.");
-                new AutoCleanupService(logger, _serviceProvider).DoWork(null);
-                return Ok();
+                _profileService.AddBan(userId, untilDate, comment, authId.Value);
             }
-            catch
+            catch (HandlingException ex)
             {
-                return StatusCode(500);
+                return new ErrorResponse(ex);
             }
+
+            return Ok();
         }
     }
 }

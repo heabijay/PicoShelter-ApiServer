@@ -23,6 +23,10 @@ namespace PicoShelter_ApiServer.DAL
         private ProfileAlbumsRepository _profileAlbumsRepository;
         private RolesRepository _roleRepository;
         private ConfirmationsRepository _confirmationRepository;
+        private ReportsRepository _reportsRepository;
+        private BansRepository _bansRepository;
+        private ImageCommentsRepository _imageCommentsRepository;
+        private ImageLikesRepository _imageLikesRepository;
 
         public IRepository<AccountEntity> Accounts => _accountRepository ??= new(_db);
         public IRepository<AlbumImageEntity> AlbumImages => _albumImagesRepository ??= new(_db);
@@ -32,6 +36,10 @@ namespace PicoShelter_ApiServer.DAL
         public IRepository<ProfileAlbumEntity> ProfileAlbums => _profileAlbumsRepository ??= new(_db);
         public IRepository<RoleEntity> Roles => _roleRepository ??= new(_db);
         public IRepository<ConfirmationEntity> Confirmations => _confirmationRepository ??= new(_db);
+        public IRepository<ReportEntity> Reports => _reportsRepository ??= new(_db);
+        public IRepository<BanEntity> Bans => _bansRepository ??= new(_db);
+        public IRepository<ImageCommentEntity> ImageComments => _imageCommentsRepository ??= new(_db);
+        public IRepository<ImageLikeEntity> ImageLikes => _imageLikesRepository ??= new(_db);
 
         public void Save()
         {

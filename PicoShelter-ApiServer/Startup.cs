@@ -1,3 +1,5 @@
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,11 +14,11 @@ using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.BLL.Services;
 using PicoShelter_ApiServer.DAL;
+using PicoShelter_ApiServer.DAL.EF;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using PicoShelter_ApiServer.Responses;
-using PicoShelter_ApiServer.Services;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
@@ -24,6 +26,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Transactions;
+using Hangfire.MySql;
+using PicoShelter_ApiServer.Hubs;
+using Microsoft.EntityFrameworkCore;
 
 namespace PicoShelter_ApiServer
 {
@@ -41,11 +47,12 @@ namespace PicoShelter_ApiServer
         {
             var connectionStrings = Configuration.GetSection("ConnectionStrings");
             var defaultConnectionString = connectionStrings.GetValue<string>("DefaultConnection");
+            var isMySql = defaultConnectionString.StartsWith("EnvironmentVariableMySQL=", StringComparison.OrdinalIgnoreCase);
             if (defaultConnectionString.StartsWith("EnvironmentVariable=", StringComparison.OrdinalIgnoreCase))
             {
                 defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnvironmentVariable=", "", StringComparison.OrdinalIgnoreCase));
             }
-            else if (defaultConnectionString.StartsWith("EnvironmentVariableMySQL=", StringComparison.OrdinalIgnoreCase))
+            else if (isMySql)
             {
                 defaultConnectionString = Environment.GetEnvironmentVariable(defaultConnectionString.Replace("EnvironmentVariableMySQL=", "", StringComparison.OrdinalIgnoreCase));
                 if (defaultConnectionString != null)
@@ -69,6 +76,7 @@ namespace PicoShelter_ApiServer
                 )
             );
 
+            services.AddScoped<ApplicationContext>(s => new ApplicationContext(defaultConnectionString));
             services.AddScoped<IUnitOfWork>(s => new EFUnitOfWork(defaultConnectionString));
             services.AddScoped<IFileUnitOfWork>(s => new FileUnitOfWork(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "FileRepository")));
             services.AddScoped<IAccountService, AccountService>();
@@ -77,8 +85,8 @@ namespace PicoShelter_ApiServer
             services.AddScoped<IAlbumService, AlbumService>();
             services.AddScoped<IEmailService>(s => new EmailService(defaultSmtpServerConfig, s.GetService<ILogger<IEmailService>>()));
             services.AddScoped<IConfirmationService, ConfirmationService>();
-
-            services.AddHostedService<AutoCleanupService>();
+            services.AddScoped<IReportService, ReportService>();
+            services.AddSingleton<ICommentNotifier, CommentHub>();
 
             services.AddCors();
 
@@ -116,6 +124,33 @@ namespace PicoShelter_ApiServer
                     };
                 });
 
+            services.AddHangfire(configuration => configuration
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseStorage<JobStorage>(isMySql
+                    ? new MySqlStorage(defaultConnectionString, new MySqlStorageOptions()
+                    {
+                        TransactionIsolationLevel = IsolationLevel.ReadCommitted,
+                        QueuePollInterval = TimeSpan.FromSeconds(15),
+                        JobExpirationCheckInterval = TimeSpan.FromHours(1),
+                        CountersAggregateInterval = TimeSpan.FromMinutes(5),
+                        PrepareSchemaIfNecessary = true,
+                        DashboardJobListLimit = 50000,
+                        TransactionTimeout = TimeSpan.FromMinutes(1),
+                        TablesPrefix = "Hangfire"
+                    })
+                    : new SqlServerStorage(defaultConnectionString, new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true
+                    })));
+
+            services.AddHangfireServer();
+
             services.AddControllers();
             services.AddMvc()
                 .ConfigureApiBehaviorOptions(options =>
@@ -127,6 +162,8 @@ namespace PicoShelter_ApiServer
                         return new ModelStateErrorResponse(modelState);
                     };
                 }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            services.AddSignalR();
 
             services.AddSwaggerGen(options =>
             {
@@ -174,23 +211,41 @@ namespace PicoShelter_ApiServer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+
+                db.Database.Migrate();
+                db.Images.RemoveRange(db.Images.Where(x => x.ImageCode == null));
+                db.SaveChanges();
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             //app.UseDeveloperExceptionPage();
-
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-
+            
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<CommentHub>("/live-comments")
+                    .AllowAnonymous()
+                    .RequireCors(cors =>
+                    {
+                        cors.AllowAnyHeader();
+                        cors.AllowAnyOrigin();
+                        cors.AllowAnyMethod();
+                    });
+                
                 endpoints.Map("/", context =>
                 {
                     var url = app.ApplicationServices.GetService<IConfiguration>().GetSection("WebApp").GetSection("Default").GetValue<string>("HomeUrl");
@@ -201,6 +256,7 @@ namespace PicoShelter_ApiServer
                 endpoints.MapDefaultControllerRoute();
             });
 
+            app.UseHangfireDashboard();
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {

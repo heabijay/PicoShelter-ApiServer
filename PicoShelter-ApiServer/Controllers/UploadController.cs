@@ -30,9 +30,7 @@ namespace PicoShelter_ApiServer.Controllers
             string idStr = User?.Identity?.Name;
             int? profileId = idStr == null ? null : int.Parse(idStr);
 
-            DateTime? deleteIn = null;
-            if (form.deleteInHours != null)
-                deleteIn = DateTime.UtcNow + TimeSpan.FromHours(form.deleteInHours.Value);
+            int? deleteIn = form.deleteInHours;
 
             if (profileId == null)
             {

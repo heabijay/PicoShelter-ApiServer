@@ -1,10 +1,12 @@
-﻿using PicoShelter_ApiServer.BLL.DTO;
+﻿using Hangfire;
+using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
 using PicoShelter_ApiServer.DAL.Entities;
 using PicoShelter_ApiServer.DAL.Enums;
 using PicoShelter_ApiServer.DAL.Interfaces;
+using PicoShelter_ApiServer.DAL.Repositories;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -24,7 +26,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             _albumService = albumService;
         }
 
-        private ConfirmationEntity GetConfirmationEntity(string token) => _db.Confirmations.FirstOrDefault(t => t.Token.Equals(token, System.StringComparison.Ordinal) && t.ValidUntilUTC >= DateTime.UtcNow);
+        private ConfirmationEntity GetConfirmationEntity(string token) => _db.Confirmations.FirstOrDefault(t => t.Token.Equals(token, StringComparison.Ordinal));
 
         public ConfirmationType? GetType(int? requesterId, string token, out string data)
         {
@@ -69,7 +71,7 @@ namespace PicoShelter_ApiServer.BLL.Services
             {
                 guid = Guid.NewGuid().ToString();
             }
-            while (_db.Confirmations.Any(t => t.Token == guid && t.ValidUntilUTC >= DateTime.UtcNow));
+            while (_db.Confirmations.Any(t => t.Token == guid));
 
             return guid;
         }
@@ -87,6 +89,9 @@ namespace PicoShelter_ApiServer.BLL.Services
             };
             _db.Confirmations.Add(item);
             _db.Save();
+
+            if (timeoutInMinutes is not null)
+                BackgroundJob.Schedule<ConfirmationsRepository>(t => t.Delete(item.Id), TimeSpan.FromMinutes(timeoutInMinutes.Value));
 
             return token;
         }

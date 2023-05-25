@@ -11,6 +11,7 @@ namespace PicoShelter_ApiServer.DAL.Entities
         public new int Id { get => AccountId; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
+        public string BackgroundCSS { get; set; }
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -18,7 +19,11 @@ namespace PicoShelter_ApiServer.DAL.Entities
         public virtual AccountEntity Account { get; set; }
 
         public virtual List<ImageEntity> Images { get; set; }
+        public virtual List<ImageCommentEntity> ImageComments { get; set; }
         public virtual List<ProfileAlbumEntity> ProfileAlbums { get; set; }
+        public virtual List<ReportEntity> Reports { get; set; }
+        public virtual List<ReportEntity> ReportsProcessed { get; set; }
+        public virtual List<BanEntity> BansProcessed { get; set; }
 
         public ProfileEntity()
         {

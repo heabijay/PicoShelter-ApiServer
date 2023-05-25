@@ -6,6 +6,7 @@ using PicoShelter_ApiServer.BLL.DTO;
 using PicoShelter_ApiServer.BLL.Extensions;
 using PicoShelter_ApiServer.BLL.Infrastructure;
 using PicoShelter_ApiServer.BLL.Interfaces;
+using PicoShelter_ApiServer.BLL.Statics;
 using PicoShelter_ApiServer.DAL.Interfaces;
 using PicoShelter_ApiServer.FDAL.Interfaces;
 using System;
@@ -35,6 +36,23 @@ namespace PicoShelter_ApiServer.BLL.Services
             profile.Lastname = dto.lastname;
             _db.Profiles.Update(profile);
             _db.Save();
+        }
+
+        public void EditBackgroundCss(int id, string backgroundCssBody)
+        {
+            var profile = _db.Profiles.Get(id);
+            profile.BackgroundCSS = PreventCssInjection(backgroundCssBody);
+            _db.Profiles.Update(profile);
+            _db.Save();
+        }
+
+        private static string PreventCssInjection(string css)
+        {
+            var i = css.IndexOfAny(new char[] { '}', '{', ';' });
+            if (i >= 0)
+                return css.Substring(0, i);
+
+            return css;
         }
 
         public Stream GetAvatar(int id)
@@ -79,6 +97,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public ProfileInfoDto GetProfileInfo(int id, bool adminData = false)
         {
+            UserBanChecker.ThrowIfUserBanned(_db, id);
             var profile = _db.Profiles.Get(id);
             if (profile != null)
             {
@@ -111,6 +130,7 @@ namespace PicoShelter_ApiServer.BLL.Services
 
         public PaginationResultDto<ImageShortInfoDto> GetImages(int id, int? starts, int? count, bool adminData = false)
         {
+            UserBanChecker.ThrowIfUserBanned(_db, id);
             var profile = _db.Profiles.Get(id);
             if (profile != null)
             {
@@ -153,6 +173,27 @@ namespace PicoShelter_ApiServer.BLL.Services
             }
 
             return null;
+        }
+
+        public void AddBan(int toId, DateTime until, string comment, int fromId)
+        {
+            var account = _db.Accounts.Get(toId);
+            if (account is null)
+                throw new HandlingException(ExceptionType.USER_NOT_FOUND);
+
+            if (account.Role?.Id > 1)
+                throw new HandlingException(ExceptionType.ADMIN_BAN_DISALLOWED);
+
+            _db.Bans.Add(new DAL.Entities.BanEntity()
+            {
+                AdminId = fromId,
+                Comment = comment,
+                UntilDate = until,
+                UserId = toId
+            });
+            account.LastCredentialsChange = DateTime.UtcNow;
+            _db.Accounts.Update(account);
+            _db.Save();
         }
     }
 }

@@ -27,12 +27,21 @@ namespace PicoShelter_ApiServer.Controllers
         public IActionResult Edit([FromBody] ProfileEditModel m)
         {
             int id = int.Parse(User.Identity.Name);
-            var mapper = new MapperConfiguration(c => c.CreateMap<ProfileEditModel, ProfileNameDto>()).CreateMapper();
-            var dto = mapper.Map<ProfileNameDto>(m);
+            var dto = new ProfileNameDto(m.Firstname, m.Lastname, null);
             _profileService.Edit(id, dto);
 
             return Ok();
         }
+
+        [HttpPut("edit/backgroundCss")]
+        public IActionResult EditBackgroundCss([FromBody] string backgroundCss)
+        {
+            int id = int.Parse(User.Identity.Name);
+            _profileService.EditBackgroundCss(id, backgroundCss);
+
+            return Ok();
+        }
+
 
         [HttpPost("avatar")]
         public IActionResult UploadAvatar(IFormFile file)

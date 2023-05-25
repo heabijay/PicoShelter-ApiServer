@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PicoShelter_ApiServer.DAL.Entities;
+using System;
 
 namespace PicoShelter_ApiServer.DAL.EF
 {
@@ -13,6 +14,8 @@ namespace PicoShelter_ApiServer.DAL.EF
         public DbSet<ProfileAlbumEntity> ProfileAlbums { get; set; }
         public DbSet<AlbumImageEntity> AlbumImages { get; set; }
         public DbSet<ConfirmationEntity> Confirmations { get; set; }
+        public DbSet<ReportEntity> Reports { get; set; }
+        public DbSet<BanEntity> Bans { get; set; }
 
 
         private readonly string _connectionString;
@@ -20,7 +23,8 @@ namespace PicoShelter_ApiServer.DAL.EF
         public ApplicationContext(string connectionString) : base()
         {
             _connectionString = connectionString;
-            Database.EnsureCreated();
+            //Database.EnsureDeleted();
+            //Database.EnsureCreated();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
@@ -41,6 +45,28 @@ namespace PicoShelter_ApiServer.DAL.EF
             RoleEntity adminRole = new() { Id = 2, Name = "admin" };
 
             builder.Entity<RoleEntity>().HasData(userRole, adminRole);
+
+
+            AccountEntity adminAccount = new()
+            {
+                Id = 1,
+                Email = "heabijay@gmail.com",
+                Username = "heabijay",
+                Password = "$PICOSHELTER$V1$10000$fplVDwM5wZprgIYyiPuF8EPf3H4t52TDCKjK90NkbSDEBaFa",
+                RoleId = 2,
+                LastCredentialsChange = DateTime.Today.ToUniversalTime(),
+            };
+
+            ProfileEntity adminProfile = new()
+            {
+                Firstname = "Denys",
+                Lastname = "Lesyshak",
+                AccountId = 1
+            };
+
+            builder.Entity<AccountEntity>().HasData(adminAccount);
+            builder.Entity<ProfileEntity>().HasData(adminProfile);
+
 
             builder.Entity<ProfileAlbumEntity>()
                 .HasOne(t => t.Profile)
@@ -75,6 +101,51 @@ namespace PicoShelter_ApiServer.DAL.EF
             builder.Entity<AccountEntity>()
                 .Property(t => t.RoleId)
                 .HasDefaultValue(1);
+
+            builder.Entity<ReportEntity>()
+                .HasOne(t => t.Image)
+                .WithMany(t => t.Reports)
+                .HasForeignKey(t => t.ImageId);
+
+            builder.Entity<ReportEntity>()
+                .HasOne(t => t.Author)
+                .WithMany(t => t.Reports)
+                .HasForeignKey(t => t.AuthorId);
+
+            builder.Entity<ReportEntity>()
+                .HasOne(t => t.ProcessedBy)
+                .WithMany(t => t.ReportsProcessed)
+                .HasForeignKey(t => t.ProcessedById);
+
+            builder.Entity<BanEntity>()
+                .HasOne(t => t.User)
+                .WithMany(t => t.Bans)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<BanEntity>()
+                .HasOne(t => t.Admin)
+                .WithMany(t => t.BansProcessed)
+                .HasForeignKey(t => t.AdminId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ImageEntity>()
+                .HasMany(t => t.Comments)
+                .WithOne(t => t.Image)
+                .HasForeignKey(t => t.ImageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ImageCommentEntity>()
+                .HasOne(t => t.Author)
+                .WithMany(t => t.ImageComments)
+                .HasForeignKey(t => t.AuthorId)
+                .OnDelete(DeleteBehavior.NoAction);
+            
+            builder.Entity<ImageLikeEntity>()
+                .HasOne(t => t.Image)
+                .WithMany(t => t.Likes)
+                .HasForeignKey(t => t.ImageId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -87,6 +87,22 @@ namespace PicoShelter_ApiServer.BLL.Extensions
             {
                 ExceptionType.USER_ALREADY_JOINED,
                 "Selected user already joined!"
+            },
+            {
+                ExceptionType.REPORT_ALREADY_PROCESSED,
+                "Selected report was already processed!"
+            },
+            {
+                ExceptionType.PROFILE_IS_BANNED,
+                "Selected profile is banned!"
+            },
+            {
+                ExceptionType.ADMIN_BAN_DISALLOWED,
+                "You couldn't ban administrator."
+            },
+            {
+                ExceptionType.USER_BANNED,
+                "User banned."
             }
         };
 
